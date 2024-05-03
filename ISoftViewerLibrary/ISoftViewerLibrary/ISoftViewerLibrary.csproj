@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Folder Include="Logics\QCOperation\Modal\" />
+		<Folder Include="Models\DicomOperators\" />
+		<Folder Include="Models\DatabaseOperators\" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="fo-dicom.Drawing" Version="4.0.8" />
+    <PackageReference Include="fo-dicom.NetCore" Version="4.0.8" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+  </ItemGroup>
+
+</Project>

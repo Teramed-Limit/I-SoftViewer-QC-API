@@ -1,0 +1,1364 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ISoftViewerQCSystem</name>
+    </assembly>
+    <members>
+        <member name="T:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice">
+            <summary>
+            香港中文大學客製化服務
+            這邊會直接操作,因為客製化的內容應該不多,所以就不再細分到單獨的服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice.DbQryService">
+            <summary>
+            資料庫查詢服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice.DbCmdService">
+            <summary>
+            資料庫更新服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice.#ctor(ISoftViewerLibrary.Services.DbQueriesService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Services.DbCommandService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable})">
+            <summary>
+            建構
+            </summary>
+            <param name="dbQryService"></param>
+            <param name="dbCmdService"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice.Execute(System.Object)">
+            <summary>
+            執行
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice.IsStudyHasReport(System.String)">
+            <summary>
+            該筆檢查是否有報告
+            </summary>
+            <param name="studyInstanceUID"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.CuhkCustomizeSrvice.UpdateReportingUID(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.MergeStudyParameter)">
+            <summary>
+            更新報告UID
+            </summary>
+            <param name="msParameter"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2">
+            <summary>
+            
+            </summary>
+            <typeparam name="T1"></typeparam>
+            <typeparam name="T2"></typeparam>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{`1})">
+            <summary>
+            建構
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.TableService">
+            <summary>
+            DicomServiceProvider資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.Handle(System.String,System.Object)">
+            <summary>
+            處理回覆單筆資料
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.HandleMultiple(System.String,System.Object)">
+            <summary>
+            處理回覆多筆資料
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.NewData(`1)">
+            <summary>
+            產生新的轉換資料
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.ConvertData(`1)">
+            <summary>
+            轉換資料
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DbQueryApplicationService`2.HandleMultiple(System.String)">
+            <summary>
+            取得特定資料
+            </summary>
+            <param name="userName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService">
+            <summary>
+                DICOM檢查命令應用層服務(Create,Update,Delete)
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService.#ctor(ISoftViewerLibrary.Models.Interface.IDcmCommand,ISoftViewerLibrary.Services.RepositoryService.Table.DicomOperationNodeService,ISoftViewerLibrary.Logics.QCOperation.QCOperationContext)">
+            <summary>
+                建構
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService.Handle(System.String,System.Object)">
+            <summary>
+                處理命令
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService.DicomCmdService">
+            <summary>
+                DICOM命令服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService._dicomOperationNodeService">
+            <summary>
+                DB Dicom Node
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService.QCOperationContext">
+            <summary>
+                使用者QC操作記錄器
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Applications.DcmDataCmdApplicationService.CmdServiceType">
+            <summary>
+                Service type
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.DcmDataQueryApplicationService">
+            <summary>
+                DICOM檢查編輯應用層服務(Create,Update,Delete)
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DcmDataQueryApplicationService.#ctor(ISoftViewerLibrary.Models.Interface.IDcmQueries,ISoftViewerLibrary.Services.RepositoryService.Table.DicomOperationNodeService,ISoftViewerLibrary.Logics.QCOperation.QCOperationContext)">
+            <summary>
+                建構
+            </summary>
+            <param name="dcmQueries"></param>
+            <param name="dicomOperationNodeService"></param>
+            <param name="qcOperationContext"></param>
+            <param name="settings"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.DcmDataQueryApplicationService.Handle(System.String,System.Object)">
+            <summary>
+                處理命令
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DcmDataQueryApplicationService.DicomQryService">
+            <summary>
+                DICOM查詢服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DcmDataQueryApplicationService.DicomOperationNodeService">
+            <summary>
+                DB Dicom Node
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.DcmDataQueryApplicationService.QCOperationContext">
+            <summary>
+                使用者QC操作記錄器
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService">
+            <summary>
+            PACS環境組態應用服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration})">
+            <summary>
+            建構
+            </summary>
+            <param name="repositoryService"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService.ConvertData(ISoftViewerLibrary.Models.DTOs.SvrConfiguration)">
+            <summary>
+            轉換資料
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsDcmProviderApplicationService">
+            <summary>
+            PACS DicomProvider組態設定
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsDcmProviderApplicationService.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmProviderDb})">
+            <summary>
+            建構
+            </summary>
+            <param name="repositoryService"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsDcmProviderApplicationService.NewData(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmProviderDb)">
+            <summary>
+            產生新的轉換資料
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsRoutingDestinationNode">
+            <summary>
+            PACS DicomDestination組態資料
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsRoutingDestinationNode.HandleMultiple(System.String)">
+            <summary>
+            取得特定資料
+            </summary>
+            <param name="userName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Applications.StudyQcApplicationService">
+            <summary>
+            Study QC應用層服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.StudyQcApplicationService.#ctor(Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Applications.StudyQcApplicationService},ISoftViewerLibrary.Services.DbQueriesService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Services.DbCommandService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Models.Interfaces.IDcmUnitOfWork,ISoftViewerLibrary.Models.Interfaces.IDcmCqusDatasets,ISoftViewerLibrary.Models.ValueObjects.EnvironmentConfiguration,ISoftViewerLibrary.Logics.QCOperation.QCOperationContext)">
+            <summary>
+            建構
+            </summary>
+            <param name="logger"></param>
+            <param name="dbQryService"></param>
+            <param name="dbCmdService"></param>
+            <param name="dcmUnitOfWork"></param>
+            <param name="dcmCqusDatasts"></param>
+            <param name="config"></param>
+            <param name="qcOperationContext"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.DbQryService">
+            <summary>
+            資料庫查詢服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.DbCmdService">
+            <summary>
+            資料庫異動命令服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.DcmUnitOfWork">
+            <summary>
+            DICOM服務單一作業流程
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.DcmCqusDatasets">
+            <summary>
+            Dataset Repository輔助物件
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.Logger">
+            <summary>
+            日誌記錄器
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.EnvirConfig">
+            <summary>
+            環境全域組態
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Applications.StudyQcApplicationService.CmdServiceType">
+            <summary>
+            Service type
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.QCOperationContext">
+            <summary>
+                使用者QC操作記錄器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Applications.StudyQcApplicationService.Handle(System.String,System.Object)">
+            <summary>
+            命令處理
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AnnotationController">
+            <summary>
+                組態設定控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AnnotationController.SaveAnnotation(System.String,ISoftViewerLibrary.Models.BodyRequestParams.ImageAnnotation)">
+            <summary>
+                根據Type取得Enable的DicomNode
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AutoMappingController">
+            <summary>
+                組態設定控制器
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.ConfigurationController">
+            <summary>
+                組態設定控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.GetDicomNodeConfig">
+            <summary>
+                取得DicomNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.GetCFindNode(System.String)">
+            <summary>
+                根據Type取得Enable的DicomNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.AddDicomNodeConfig(ISoftViewerLibrary.Models.DTOs.DicomOperationNodes)">
+            <summary>
+                增加DicomOperationNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.PostDicomNodeConfig(ISoftViewerLibrary.Models.DTOs.DicomOperationNodes,System.String)">
+            <summary>
+                更新DicomOperationNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.Delete(System.String)">
+            <summary>
+                刪除DicomOperationNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.GetDDcomDestinationNode">
+            <summary>
+                取得DicomNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.AddDicomDesNodeConfig(ISoftViewerLibrary.Models.DTOs.DicomDestinationNode)">
+            <summary>
+                增加DicomDestinationNodes
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.PostDicomDesNodeConfig(ISoftViewerLibrary.Models.DTOs.DicomDestinationNode,System.String)">
+            <summary>
+                更新DicomDestinationNodes
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.DeleteDicomDesNodeConfig(System.String)">
+            <summary>
+                刪除DicomDestinationNodes
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ConfigurationController.RestartService">
+            <summary>
+                Restart PACS Service
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.DicomDbQueryController">
+            <summary>
+                DB Dicom Query
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetPatientStudy(ISoftViewerLibrary.Models.DTOs.Queries.V1.QueryDBKeys)">
+            <summary>
+                Patient/Study View data
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetPatient(System.String)">
+            <summary>
+                Patient level data
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetStudy(System.String)">
+            <summary>
+                Study level data
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetSeries(System.String)">
+            <summary>
+                Series level data
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetImage(System.String)">
+            <summary>
+                Image level data
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetImagePathByStudyInstanceUID(System.String)">
+            <summary>
+                ImagePath level data by (StudyInstanceUID)
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetImagePathByStudySeriesInstanceUID(System.String)">
+            <summary>
+                ImagePath level data by (SeriesInstanceUID)
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.DicomTagController">
+            <summary>
+                DB Dicom Query
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.GetImageTag(System.String)">
+            <summary>
+                Get image tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.ModifyTagInStudyInstanceUID(ISoftViewerLibrary.Models.DTOs.ModifyDicomTagData,System.String)">
+            <summary>
+                Modify image tag where in studyInstanceUID
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.ModifyTagInSeriesInstanceUID(ISoftViewerLibrary.Models.DTOs.ModifyDicomTagData,System.String)">
+            <summary>
+                Modify image tag where in SeriesInstanceUID
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.ModifyTagSopInstanceUID(ISoftViewerLibrary.Models.DTOs.ModifyDicomTagData,System.String)">
+            <summary>
+                Modify image tag where in SopInstanceUID
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.EchoDcmServiceController">
+            <summary>
+                查詢控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.EchoDcmServiceController.#ctor(ISoftViewerLibrary.Models.Interfaces.IDcmUnitOfWork,ISoftViewerLibrary.Models.Interfaces.IDcmRepository)">
+            <summary>
+                建構
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.EchoDcmServiceController.CEcho(ISoftViewerLibrary.Models.DTOs.DicomOperationNodes)">
+            <summary>
+                查詢資料庫並Echo到指定Server AE Title
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.EchoDcmServiceController._dcmRepository">
+            <summary>
+                DICOM Repository
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.EchoDcmServiceController._netUnitOfWork">
+            <summary>
+                DICOM UnitOfWork
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.ImageRendererController">
+            <summary>
+                DB Dicom Query
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ImageRendererController.GetDcmImage(System.String)">
+            <summary>
+                Get dcm image
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.ImageRendererController.GetJpgImage(System.String)">
+            <summary>
+                Get jpg image
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.LogController">
+            <summary>
+                記錄日誌控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.LogController.GetStudyOperationLog(System.String)">
+            <summary>
+                取得檢查對應的記錄日誌
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.LogController.GetStudyByUserOperateBefore(System.String)">
+            <summary>
+                取得使用者經手過的檢查
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrDcmDestNode})">
+            <summary>
+            建構
+            </summary>
+            <param name="routingDestinationNode"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.DcmDestinationNodeService">
+            <summary>
+            DicomServiceProvider資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.GetDcmDestinationNode">
+            <summary>
+            取得Dicom routing node
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.GetDcmDestinationNodeAETitle">
+            <summary>
+            取得Dicom routing node
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.AddDicomNodeConfig(ISoftViewerLibrary.Models.DTOs.SvrDcmDestNode)">
+            <summary>
+            增加Routing Node
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.Post(System.String)">
+            <summary>
+            刪除Routing Node
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTags},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilterDetail},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilters})">
+            <summary>
+            建構
+            </summary>
+            <param name="tag"></param>
+            <param name="tagFilterDetail"></param>
+            <param name="tagFileters"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PacsDicomTagService">
+            <summary>
+            DicomTags資料表處理服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PacsDicomTagFilterDetaulService">
+            <summary>
+            DicomTagFilterDetail資料表處理服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PacsDicomTagFiltersService">
+            <summary>
+            DicomTagFilters資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.GetDicomTag">
+            <summary>
+            取得Dicom Tag列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.AddDicomTag(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTags)">
+            <summary>
+            增加Dicom Tag     
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PostDicomTag(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTags,System.String)">
+            <summary>
+            更新Dicom Tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.DeleteDicomTag(System.String)">
+            <summary>
+            刪除Dicom Tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.GetDicomTagFilterDetail">
+            <summary>
+            取得Dicom Tag Filter Detail 列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.AddDicomTagFilterDetail(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilterDetail)">
+            <summary>
+            增加Dicom Tag Filter Detail
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PostDicomTagFilterDetail(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilterDetail,System.String)">
+            <summary>
+            更新Dicom Tag Filter Detail
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.DeleteDicomTagFilterDetail(System.String)">
+            <summary>
+            刪除Dicom Tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.GetDicomTagFilters">
+            <summary>
+            取得Dicom Tag Filters 列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.AddDicomTagFilters(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilters)">
+            <summary>
+            增加Dicom Tag Filter Filters
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PostDicomTagFilters(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilters,System.String)">
+            <summary>
+            更新Dicom Tag Filter Detail
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.DeleteDicomTagFilters(System.String)">
+            <summary>
+            刪除Dicom Tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.Log.V1.JobOptResultLog})">
+            <summary>
+            建構
+            </summary>
+            <param name="pacsConfig"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsLogController.PacsConfigDbService">
+            <summary>
+            SystemConfiguration資料表處理服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsLogController.JobOptResultDbService">
+            <summary>
+            JobOptResultLog資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetLogType">
+            <summary>
+            取得Log的型態
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetPacsLog(System.String,System.String,System.String)">
+            <summary>
+            取得PACS Log內容
+            </summary>
+            <param name="logType"></param>
+            <param name="aeTitle"></param>
+            <param name="studyDate"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetGetRoutingErrorLog(System.String,System.String)">
+            <summary>
+            取得Service Job的Log資訊
+            </summary>
+            <param name="patientID"></param>
+            <param name="date"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.PacsServiceNodeController">
+            <summary>
+                組態設定控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmNodeDb},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrDcmDestNode})">
+            <summary>
+            建構
+            </summary>
+            <param name="dicomNodeService"></param>
+            <param name="routingDestinationNode"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.DcmNodeService">
+            <summary>
+            DicomTable資料庫處理服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.DcmDestinationNode">
+            <summary>
+            DicomServiceProvider資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.GetDicomNodeConfig">
+            <summary>
+                取得DicomNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.GetScheduleJobTypes">
+            <summary>
+            取得排程的型態
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.GetRoutingDestination">
+            <summary>
+            取得繞送DICOM SCP設定
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.AddDicomNodeConfig(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmNodeWeb)">
+            <summary>
+                增加DicomNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.PostDicomNodeConfig(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmNodeWeb,System.String)">
+            <summary>
+                更新DicomNode
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceNodeController.Post(System.String)">
+            <summary>
+                刪除DicomNode
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.PacsServiceProviderController">
+            <summary>
+            DicomServiceProvider控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmProviderDb})">
+            <summary>
+            建構
+            </summary>
+            <param name="service"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.DcmServiceProviderConfig">
+            <summary>
+            DicomServiceProvider資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.GetDicomProviderConfig">
+            <summary>
+            取得DicomServiceProvider資料表所有資料
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.GetDicomProviderAETitle">
+            <summary>
+            取得Provider所有AETitle
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.AddDicomProviderConfig(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmProviderWeb)">
+            <summary>
+            增加DicomServiceProvider        
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.PostDicomProviderConfig(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmProviderWeb)">
+            <summary>
+            更新DicomServiceProvider
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.Post(System.String)">
+            <summary>
+            刪除DicomServiceProvider
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrFileStorageDevice})">
+            <summary>
+            建構
+            </summary>
+            <param name="device"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.PacsDeviceService">
+            <summary>
+            StorageDevice資料表處理服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.GetStorageDevice">
+            <summary>
+            取得儲存裝置資料
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.GetStorageLevel">
+            <summary>
+            取得PACS SystemConfiguration Log Level
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.PostDicomProviderConfig(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrFileStorageDevice,System.String)">
+            <summary>
+            更新StorageDevice
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration},ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService,Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.SearchDcmServiceController})">
+            <summary>
+            建構
+            </summary>
+            <param name="pacsConfig"></param>
+            <param name="service"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsSysConfigController.PacsConfigDbService">
+            <summary>
+            SystemConfiguration資料表處理服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsSysConfigController.ConfigAppService">
+            <summary>
+             SystemConfiguration服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsSysConfigController.Logger">
+            <summary>
+            日誌記錄器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.HandleSearch``2(``0,System.Func{System.String,``0,System.Threading.Tasks.Task{``1}})">
+            <summary>
+            查詢處理
+            </summary>
+            <typeparam name="T1"></typeparam>
+            <typeparam name="T2"></typeparam>
+            <param name="request"></param>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.GetPacsConfigeData">
+            <summary>
+            取得PACS SystemConfiguration
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.GetPacsConfigeLogLevel">
+            <summary>
+            取得PACS SystemConfiguration Log Level
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.PostDicomProviderConfig(ISoftViewerLibrary.Models.DTOs.SvrConfiguration,System.String)">
+            <summary>
+            更新SystemConfiguration
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.PostDicomServiceAction(System.String)">
+            <summary>
+            取得I-SoftViewer PACS Service的啟用狀況
+            </summary>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.QCFuncController">
+            <summary>
+            功能名稱控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.QCFuncController.Get">
+            <summary>
+            取得功能列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.RoleController">
+            <summary>
+            角色控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.Get">
+            <summary>
+                取得所有角色列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.AddUser(ISoftViewerLibrary.Models.DTOs.UserRole)">
+            <summary>
+                新增角色列表
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.Post(ISoftViewerLibrary.Models.DTOs.UserRole,System.String)">
+            <summary>
+            修改角色列表
+            </summary>
+            <param name="data"></param>
+            <param name="roleName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.Delete(System.String)">
+            <summary>
+                刪除角色列表
+            </summary>
+            <param name="roleName"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.AddQCFuction(System.String,System.String)">
+            <summary>
+                增加指定Role QC function
+            </summary>
+            <param name="roleName"></param>
+            <param name="qcFunction"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.DeleteQCFunction(System.String,System.String)">
+            <summary>
+            刪除指定Role QC function
+            </summary>
+            <param name="roleName"></param>
+            <param name="qcFunction"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.GetRoleFuctionList(System.String)">
+            <summary>
+                取得指定Role QC function
+            </summary>
+            <param name="roleName"></param>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.SearchDcmServiceController">
+            <summary>
+            查詢控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.#ctor(ISoftViewerLibrary.Applications.Interface.IApplicationQueryService,Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.SearchDcmServiceController})">
+            <summary>
+            建構
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.QueryAppService">
+            <summary>
+            應用層查詢服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.Logger">
+            <summary>
+            日誌記錄器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.Worklist(ISoftViewerLibrary.Models.DTOs.Queries.V1.FindWorklistKeys)">
+            <summary>
+            透過MatchKeys來查詢資料(Worklist)
+            </summary>
+            <param name="matchKeys"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.CFind(ISoftViewerLibrary.Models.DTOs.Queries.V1.FindQRKeys)">
+            <summary>
+            透過MatchKeys來查詢資料(QR-Find)
+            </summary>
+            <param name="matchKeys"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.CMove(ISoftViewerLibrary.Models.DTOs.Queries.V1.MoveQRKeys)">
+            <summary>
+            透過MatchKeys來查詢資料(QR-Move)
+            </summary>
+            <param name="matchKeys"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.SearchDcmServiceController.HandleSearch``1(``0,System.Func{System.String,``0,System.Threading.Tasks.Task{ISoftViewerLibrary.Models.DTOs.Queries.V1.QueryResult}})">
+            <summary>
+            查詢服務
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="request"></param>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.StoreDcmServiceController">
+            <summary>
+                查詢控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StoreDcmServiceController.#ctor(ISoftViewerLibrary.Services.RepositoryService.View.DicomImagePathViewService,ISoftViewerLibrary.Services.RepositoryService.Table.DicomOperationNodeService,ISoftViewerLibrary.Logics.QCOperation.QCOperationContext,ISoftViewerLibrary.Models.Interfaces.IDcmUnitOfWork,ISoftViewerLibrary.Models.Interfaces.IDcmRepository)">
+            <summary>
+                建構
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StoreDcmServiceController.CStoreStudy(System.String,ISoftViewerLibrary.Models.DTOs.CStoreDetails)">
+            <summary>
+                查詢資料庫並C-Store到指定Server AE Title
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StoreDcmServiceController._dicomImagePathService">
+            <summary>
+                應用層查詢服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StoreDcmServiceController._dicomOperationNodeService">
+            <summary>
+                應用層查詢服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StoreDcmServiceController._dcmRepository">
+            <summary>
+                DICOM Repository
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StoreDcmServiceController._netUnitOfWork">
+            <summary>
+                DICOM UnitOfWork
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StoreDcmServiceController._qcOperationContext">
+            <summary>
+                使用者QC操作記錄器
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.StudyMaintenanceController">
+            <summary>
+                病歷檢查維護控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.#ctor(System.Collections.Generic.IEnumerable{ISoftViewerLibrary.Applications.Interface.IApplicationCmdService},Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.StudyMaintenanceController})">
+            <summary>
+                建構
+            </summary>
+            <param name="cmdServices"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.HandleCommand``1(``0,System.Func{System.String,``0,System.Threading.Tasks.Task})">
+            <summary>
+                處理即記錄日誌
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="command"></param>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Post(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.CreateAndModifyStudy{ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.ImageBufferAndData})">
+            <summary>
+                Create Study建立檢查含Pixel Data
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Put(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.MergeStudyParameter)">
+            <summary>
+                病歷檢查資料校正,合併檢查
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Put(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.SplitStudyParameter)">
+            <summary>
+                病歷檢查資料校正,拆解檢查
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Put(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.StudyMappingParameter)">
+            <summary>
+                病歷檢查資料與外部資料做資料批配校正
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Put(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.StudyUnmappingParameter)">
+            <summary>
+                病歷檢查資料反批配復原
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Delete(System.String)">
+            <summary>
+                刪除檢查
+            </summary>
+            <param name="study_id"></param>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.DcmStudyMaintenanceService">
+            <summary>
+                DICOM建立及資料修正
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.StudyQcApplicationService">
+            <summary>
+                DICOM QC
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Logger">
+            <summary>
+                日誌記錄器
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.UserAccountController">
+            <summary>
+                使用者帳號控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Login(ISoftViewerLibrary.Models.DTOs.LoginRequest)">
+            <summary>
+                使用者登入
+            </summary>
+            <param name="request"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Logout">
+            <summary>
+                使用者登出
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.RefreshToken(ISoftViewerLibrary.Models.DTOs.RefreshTokenRequest)">
+            <summary>
+                權杖重新取得
+            </summary>
+            <param name="request"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Get">
+            <summary>
+                取得所有帳號資訊
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.AddUser(ISoftViewerLibrary.Models.DTOs.LoginUserDataDto)">
+            <summary>
+                新增使用者帳號資訊
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Post(ISoftViewerLibrary.Models.DTOs.LoginUserDataDto)">
+            <summary>
+                修改使用者帳號資訊
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Delete(System.String)">
+            <summary>
+                刪除單一帳號
+            </summary>
+            <param name="userId"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.OnConnectedAsync">
+            <summary>
+                連線事件
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.OnDisconnectedAsync(System.Exception)">
+            <summary>
+                離線事件
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.GetOnlineAccount">
+            <summary>
+                獲取線上帳號，除了自己以外
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.GetRoomMember(System.String)">
+            <summary>
+                獲取房間內成員
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.InviteMember(System.String,System.String,System.String,System.String)">
+            <summary>
+                邀請進入遠端會診
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.AcceptInvite(System.String)">
+            <summary>
+                接受邀請
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.LeaveRoom(System.String,System.Boolean)">
+            <summary>
+                離開群組
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.ViewPortSyncEvent(System.String,System.String,System.String,System.String)">
+            <summary>
+                
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Interfaces.IHandleCommand">
+            <summary>
+            Controller請求服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Interfaces.IHandleCommand.HandleCommand``1(``0,System.Func{System.String,``0,System.Threading.Tasks.Task})">
+            <summary>
+            請求新增,修改及刪除命令
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="command"></param>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Interfaces.IHandleSearch">
+            <summary>
+            請求查詢服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Interfaces.IHandleSearch.HandleSearch``1(``0,System.Func{System.String,``0,System.Threading.Tasks.Task{ISoftViewerLibrary.Models.DTOs.Queries.V1.QueryResult}})">
+            <summary>
+            請求服務處理
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="request"></param>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Interfaces.IHandleSearch2">
+            <summary>
+            泛形請求查詢服務
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Interfaces.IHandleSearch2.HandleSearch``2(``0,System.Func{System.String,``0,System.Threading.Tasks.Task{``1}})">
+            <summary>
+            請求服務處理
+            </summary>
+            <typeparam name="T1"></typeparam>
+            <typeparam name="T2"></typeparam>
+            <param name="request"></param>
+            <param name="handler"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Interfaces.IQCOperationLoggerStrategy">
+            <summary>
+                QC操作紀錄
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Models.HisLogStatusData">
+            <summary>
+            執行Log時,所記錄的訊息與結果
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Models.HisLogStatusData.EpisodeNo">
+            <summary>
+            Episode No 本次入院就診號碼
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Models.HisLogStatusData.LstMessage">
+            <summary>
+            訊息內容
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Models.HisLogStatusData.ExecuteResult">
+            <summary>
+            執行結果
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Models.HisLogStatusData.LogFilePath">
+            <summary>
+            存檔路徑
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Models.HisLogStatusData.#ctor">
+            <summary>
+            建構
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Program">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Program.Main(System.String[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Program.CreateHostBuilder(System.String[])">
+            <summary>
+            
+            </summary>
+            <param name="args"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.DicomTagService">
+            <summary>
+                DicomTag CRUD
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DicomTagService.AddItem(System.Int32,Dicom.DicomTag,System.String,System.String,System.String,System.String)">
+            <summary>
+                fo-dicom IDatasetWalker迭代Tag使用
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DicomTagService.GetDcmTag(System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+                取得檔案所有Tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DicomTagService.ModifyTag(System.String,System.String,System.String,System.UInt16,System.UInt16,System.String,ISoftViewerLibrary.Models.DTOs.DicomOperationNodes,System.Boolean)">
+            <summary>
+                修改Tag
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Startup">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Startup.Configuration">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            
+            </summary>
+            <param name="app"></param>
+            <param name="env"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.utils.FactoryTool`2.#ctor">
+            <summary>建構</summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.utils.FactoryTool`2.Dispose">
+            <summary>釋放</summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.utils.FactoryTool`2.registerProduct(`0,`1)">
+            <summary>註冊產品</summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.utils.FactoryTool`2.createProduct(`0)">
+            <summary>產生產品</summary>
+        </member>
+        <member name="T:ISoftViewerLibrary.Applications.Interface.IApplicationQueryService">
+            <summary>
+            應用層查詢服務介面
+            </summary>
+        </member>
+        <member name="M:ISoftViewerLibrary.Applications.Interface.IApplicationQueryService.Handle(System.String,System.Object)">
+            <summary>
+            處理API動作
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerLibrary.Applications.Interface.IApplicationQueryService`1">
+            <summary>
+            泛形應用層環境服務介面
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:ISoftViewerLibrary.Applications.Interface.IApplicationQueryService`1.Handle(System.String,System.Object)">
+            <summary>
+            處理API動作
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerLibrary.Applications.Interface.IApplicationQueryEnumerateService`1">
+            <summary>
+            泛形應用層環境查詢多組資料介面
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:ISoftViewerLibrary.Applications.Interface.IApplicationQueryEnumerateService`1.HandleMultiple(System.String,System.Object)">
+            <summary>
+            處理API動作
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerLibrary.Applications.Interface.IApplicationQueryEnumerateService`1.HandleMultiple(System.String)">
+            <summary>
+            取得特定資料
+            </summary>
+            <param name="userName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ISoftViewerLibrary.Applications.Interface.IApplicationCmdService">
+            <summary>
+            應用層更新服務介面
+            </summary>
+        </member>
+        <member name="M:ISoftViewerLibrary.Applications.Interface.IApplicationCmdService.Handle(System.String,System.Object)">
+            <summary>
+            處理API動作
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="P:ISoftViewerLibrary.Applications.Interface.IApplicationCmdService.CmdServiceType">
+            <summary>
+            應用層更新服務介面
+            </summary>
+        </member>
+        <member name="T:ISoftViewerLibrary.Applications.Interface.IApplicationCmdService`1">
+            <summary>
+            泛形應用層更新服務介面
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:ISoftViewerLibrary.Applications.Interface.IApplicationCmdService`1.Handle(System.String,System.Object)">
+            <summary>
+            處理API動作
+            </summary>
+            <param name="userName"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

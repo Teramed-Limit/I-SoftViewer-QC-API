@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>D:\WORK\CASE\QCSystem\Deploy</_PublishTargetUrl>
+    <History>True|2024-05-27T04:16:13.1616996Z;True|2024-05-27T12:14:55.4429582+08:00;True|2024-05-27T12:11:47.9801608+08:00;True|2024-05-15T12:09:51.7708078+08:00;True|2024-05-15T11:39:05.8101871+08:00;True|2024-05-14T19:23:12.7234233+08:00;True|2022-05-24T14:12:27.1683138+08:00;True|2022-01-28T11:37:24.8160378+08:00;True|2022-01-28T11:29:30.9922375+08:00;True|2022-01-27T15:26:22.4706487+08:00;</History>
+  </PropertyGroup>
+</Project>

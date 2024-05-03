@@ -1,0 +1,17 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
+  &lt;Assembly Path="G:\SourceCode\WebAPI\QCSystem\TeramedQCSystem\TeramedQCSystem\dll\amqmdnet.dll" /&gt;&#xD;
+  &lt;Assembly Path="G:\SourceCode\WebAPI\QCSystem\TeramedQCSystem\TeramedQCSystem\dll\MQDLL.dll" /&gt;&#xD;
+&lt;/AssemblyExplorer&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=982288e9_002D6c7b_002D4ee4_002D8cb8_002D36c2903d554b/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="T2_DcmQueries_Query_Count_AreEqual" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::DC16CB3C-54AD-469E-A9B5-41188B6CF9A6::net5.0::ISoftViewerLibUnitTest.ServiceClassTest.T2_DcmQueries_Query_Count_AreEqual&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;MSTest::DC16CB3C-54AD-469E-A9B5-41188B6CF9A6::net5.0::ISoftViewerLibUnitTest.ServiceClassTest.T3_DcmQueries_Move_Count_ArNotEqual&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;MSTest::DC16CB3C-54AD-469E-A9B5-41188B6CF9A6::net5.0::ISoftViewerLibUnitTest.ServiceClassTest.T4_DcmCommand_Store_IsTrue&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c20493a6_002Dc300_002D4325_002Db481_002Db1fd2050f494/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="T4_DcmCommand_Store_IsTrue #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::DC16CB3C-54AD-469E-A9B5-41188B6CF9A6::net5.0::ISoftViewerLibUnitTest.ServiceClassTest.T4_DcmCommand_Store_IsTrue&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

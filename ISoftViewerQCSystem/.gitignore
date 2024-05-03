@@ -1,0 +1,14 @@
+*.cache
+*.log
+
+packages/
+.vs/
+.idea/
+
+bin/
+obj/
+
+.vscode/
+tmpCmd.bat
+
+I-SoftViewer-PMS-API/Properties/PublishProfiles/

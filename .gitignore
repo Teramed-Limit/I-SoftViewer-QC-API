@@ -1,0 +1,11 @@
+ISoftViewerLibrary/ISoftViewerLibrary/bin/*
+ISoftViewerLibrary/ISoftViewerLibrary/obj/*
+TeramedQCSystem/TeramedQCSystem/bin/*
+TeramedQCSystem/TeramedQCSystem/obj/*
+TeramedQCSystem/.vs/TeramedQCSystem/*
+UnitTest/ISoftViewerLibUnitTest/bin/*
+UnitTest/ISoftViewerLibUnitTest/obj/*
+TeramedQCSystem/.vs
+TeramedQCSystem/.idea
+
+ISoftViewerLibrary/ISoftViewerLibrary/.vs/
