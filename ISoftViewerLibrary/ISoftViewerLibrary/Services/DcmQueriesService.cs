@@ -4,13 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dicom;
+using Dicom.IO;
 using ISoftViewerLibrary.Logic.Converter;
+using ISoftViewerLibrary.Model.DicomOperator;
 using ISoftViewerLibrary.Models.Aggregate;
 using ISoftViewerLibrary.Models.DatabaseTables;
 using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.Interface;
 using ISoftViewerLibrary.Models.Interfaces;
 using ISoftViewerLibrary.Models.ValueObjects;
+using ISoftViewerLibrary.Utils;
 using static ISoftViewerLibrary.Models.ValueObjects.Types;
 using static ISoftViewerLibrary.Models.DTOs.DataCorrection.V1;
 
@@ -107,14 +110,14 @@ namespace ISoftViewerLibrary.Services
                 if (type != DcmServiceUserType.dsutMove)
                 {
                     jsonDatasets = new Queries.V1.QueryResult();
-                    // DcmRepository.DicomDatasets.Clear();
-                    // DcmRepository.DicomDatasets.Add(CreateTestWLDataset());
-
                     foreach (var dataset in DcmRepository.DicomDatasets)
                     {
-                        List<DcmTagData> queryResult = new();
-                        converter.ConvertToDcmTagData(dataset).ForEach(x => queryResult.Add(x));
-                        // var queryResult = converter.PopulateFromDataset(dataset);
+                        List<DcmTagData> flatQueryResult = new();
+                        // 這個是把所有Tag打平，供前端顯示使用
+                        converter.ConvertToDcmTagData(dataset).ForEach(x => flatQueryResult.Add(x));
+                        jsonDatasets.FlatDatasets.Add(flatQueryResult);
+                        // 這個是原始的Dataset，供後端處理使用
+                        var queryResult = converter.PopulateFromDataset(dataset);
                         jsonDatasets.Datasets.Add(queryResult);
                     }
                 }
@@ -231,27 +234,101 @@ namespace ISoftViewerLibrary.Services
         }
 
 
-        private DicomDataset CreateTestWLDataset()
+        private DicomDataset CreateTestDataset(int numnber)
         {
-            var file = DicomFile.Open(@"C:\Users\Romeo\Desktop\test2.dcm");
+            var dataset = new DicomDataset()
+            {
+                EncodeValue(DicomTag.SpecificCharacterSet, "ISO_IR 100"),
+                EncodeValue(DicomTag.AccessionNumber, "55397"+ "_" + numnber),
+                EncodeValue(DicomTag.ReferringPhysicianName, "³¯¥ß²»"),
+                new DicomSequence(DicomTag.ReferencedStudySequence,
+                    new DicomDataset
+                    {
+                        EncodeValue(DicomTag.ReferencedSOPClassUID,
+                            "1.2.410.200010.1140227.4636.1161209.1363005.1.1363005"),
+                        EncodeValue(DicomTag.ReferencedSOPInstanceUID,
+                            "1.2.410.200010.1140227.4636.1161209.1363005.1.1363005")
+                    }),
+                new DicomSequence(DicomTag.ReferencedPatientSequence,
+                    new DicomDataset
+                    {
+                        EncodeValue(DicomTag.ReferencedSOPClassUID, "1.2.840.10008.3.1.2.3.1"),
+                        EncodeValue(DicomTag.ReferencedSOPInstanceUID, "1.2.840.10008.3.1.2.3.1")
+                    }),
+                EncodeValue(DicomTag.PatientName, "±i¶À¤ë"),
+                EncodeValue(DicomTag.PatientID, "10052351"),
+                EncodeValue(DicomTag.PatientBirthDate, "19430125"),
+                EncodeValue(DicomTag.PatientSex, "F"),
+                EncodeValue(DicomTag.OtherPatientIDsRETIRED, "10052351"),
+                EncodeValue(DicomTag.OtherPatientNames, "±i¶À¤ë"),
+                // 這個要轉，原本是81Y
+                EncodeValue(DicomTag.PatientAge, "081Y"),
+                EncodeValue(DicomTag.PatientSize, ""),
+                EncodeValue(DicomTag.PatientWeight, ""),
+                EncodeValue(DicomTag.MedicalAlerts, ""),
+                EncodeValue(DicomTag.Allergies, ""),
+                EncodeValue(DicomTag.PregnancyStatus, ""),
+                // EncodeValue(DicomTag.StudyInstanceUID, "1.2.410.200010.1140227.4636.1161209.1363005.1.1363005"),
+                EncodeValue(DicomTag.StudyInstanceUID, DicomUID.Generate().UID),
+                EncodeValue(DicomTag.RequestingPhysician, "³¯¥ß²»"),
+                EncodeValue(DicomTag.RequestingService, "02"),
+                EncodeValue(DicomTag.RequestedProcedureDescription, "¦µ¤R°Ç¤ó¤ßÅ¦¦å¬y¹Ï Doppler color flow mapping"),
+                new DicomSequence(DicomTag.RequestedProcedureCodeSequence,
+                    new DicomDataset
+                    {
+                        EncodeValue(DicomTag.CodeValue, "18007"),
+                        EncodeValue(DicomTag.CodingSchemeDesignator, "802PT"),
+                        EncodeValue(DicomTag.CodeMeaning, "¦µ¤R°Ç¤ó¤ßÅ¦¦å¬y¹Ï Doppler color flow mapping")
+                    }),
+                EncodeValue(DicomTag.AdmissionID, "1003730"),
+                EncodeValue(DicomTag.SpecialNeeds, ""),
+                EncodeValue(DicomTag.CurrentPatientLocation, "O"),
+                EncodeValue(DicomTag.PatientInstitutionResidence, "W5-51"),
+                EncodeValue(DicomTag.PatientState, ""),
+                new DicomSequence(DicomTag.ScheduledProcedureStepSequence,
+                    new DicomDataset
+                    {
+                        EncodeValue(DicomTag.Modality, "US"),
+                        EncodeValue(DicomTag.RequestedContrastAgent, ""),
+                        EncodeValue(DicomTag.ScheduledStationAETitle, "US"),
+                        EncodeValue(DicomTag.ScheduledProcedureStepStartDate, "20240522"),
+                        EncodeValue(DicomTag.ScheduledProcedureStepStartTime, "140100"),
+                        EncodeValue(DicomTag.ScheduledPerformingPhysicianName, ""),
+                        EncodeValue(DicomTag.ScheduledProcedureStepDescription,
+                            "¦µ¤R°Ç¤ó¤ßÅ¦¦å¬y¹Ï Doppler color flow mapping"),
+                        new DicomSequence(DicomTag.ScheduledProtocolCodeSequence,
+                            new DicomDataset
+                            {
+                                EncodeValue(DicomTag.CodeValue, "18007"),
+                                EncodeValue(DicomTag.CodingSchemeDesignator, "802PT"),
+                                EncodeValue(DicomTag.CodingSchemeVersion, ""),
+                                EncodeValue(DicomTag.CodeMeaning, "¦µ¤R°Ç¤ó¤ßÅ¦¦å¬y¹Ï Doppler color flow mapping")
+                            }),
+                        EncodeValue(DicomTag.ScheduledProcedureStepID, "696704"),
+                        EncodeValue(DicomTag.ScheduledStationName, ""),
+                        EncodeValue(DicomTag.ScheduledProcedureStepLocation, ""),
+                        EncodeValue(DicomTag.PreMedication, ""),
+                        EncodeValue(DicomTag.ScheduledProcedureStepStatus, "A"),
+                    }),
+                EncodeValue(DicomTag.RequestedProcedureID, "1363005"),
+                EncodeValue(DicomTag.IssueDateOfImagingServiceRequest, "20240522"),
+                EncodeValue(DicomTag.IssueTimeOfImagingServiceRequest, "140227"),
+                EncodeValue(DicomTag.ConfidentialityConstraintOnPatientDataDescription, "Y")
+            };
 
-            // DicomElement element = file.Dataset.GetDicomItem<DicomElement>(DicomTag.PatientName);
-            // string[] encodings = { "Big5", "GB2312", "Shift-JIS", "Windows-1252", "ISO-8859-1" };
-            // foreach (var encodingName in encodings)
-            // {
-            //     try
-            //     {
-            //         Encoding encoding = Encoding.GetEncoding(encodingName);
-            //         string value = encoding.GetString(element.Buffer.Data);
-            //         Console.WriteLine($"使用 {encodingName} 編碼解碼: {value}");
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         Console.WriteLine($"無法使用 {encodingName} 編碼解碼: {ex.Message}");
-            //     }
-            // }
 
-            return file.Dataset;
+            static DicomItem EncodeValue(DicomTag tag, string value, string fromEncoding = "latin1",
+                string toEncoding = "big5")
+            {
+                DicomItem[] items = new DicomItem[1];
+
+                byte[] bytes = Encoding.GetEncoding(fromEncoding).GetBytes(value);
+                string unicodeString = Encoding.GetEncoding(toEncoding).GetString(bytes);
+                items[0] = new DicomLongString(tag, Encoding.GetEncoding(toEncoding), new[] { unicodeString });
+                return items[0];
+            }
+
+            return dataset;
         }
 
         #endregion

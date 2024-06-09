@@ -68,6 +68,8 @@ namespace ISoftViewerLibrary.Models.DTOs
         public List<DicomNode> StoreSCP { get; set; }
         public ElementList CFindReqField { get; set; }
         public ElementList MappingField { get; set; }
+        // public ElementList MappingField { get; set; }
+        // public ElementList MappingField { get; set; }
     }
 
     /// <summary>
@@ -75,35 +77,41 @@ namespace ISoftViewerLibrary.Models.DTOs
     /// </summary>
     public class EnvSetup
     {
-        /// <summary>
-        /// 獲取或設置映射等級。
-        /// </summary>
         [JsonPropertyName("mappingLevel")]
         public int MappingLevel { get; set; }
 
-        /// <summary>
-        /// 獲取或設置映射之間的天數。
-        /// </summary>
         [JsonPropertyName("mappingBetweenDay")]
         public int MappingBetweenDay { get; set; }
 
-        /// <summary>
-        /// 獲取或設置是否區分大小寫。
-        /// </summary>
         [JsonPropertyName("caseSensitive")]
         public bool CaseSensitive { get; set; }
 
-        /// <summary>
-        /// 獲取或設置是否啟用。
-        /// </summary>
         [JsonPropertyName("enabled")]
         public bool Enabled { get; set; }
 
-        /// <summary>
-        /// 獲取或設置最後修改日期的間隔。
-        /// </summary>
         [JsonPropertyName("lastModifiedDtInterval")]
         public int LastModifiedDtInterval { get; set; }
+
+        [JsonPropertyName("tryMaximumCountOfMapping")]
+        public int TryMaximumCountOfMapping { get; set; }
+
+        [JsonPropertyName("mappingDataMethod")]
+        public int MappingDataMethod { get; set; }
+
+        [JsonPropertyName("mappingRelationCase")]
+        public MappingRelationCase MappingRelationCase { get; set; }
+    }
+    
+    public class MappingRelationCase
+    {
+        [JsonPropertyName("fromDcmFileTag")]
+        public string FromDcmFileTag { get; set; }
+
+        [JsonPropertyName("fromMwlTag")]
+        public string FromMwlTag { get; set; }
+
+        [JsonPropertyName("value")]
+        public string Value { get; set; }
     }
 
     public class ElementList

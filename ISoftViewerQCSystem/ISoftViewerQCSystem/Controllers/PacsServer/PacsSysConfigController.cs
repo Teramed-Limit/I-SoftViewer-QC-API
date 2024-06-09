@@ -7,6 +7,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 using ISoftViewerLibrary.Models.DTOs;
+using ISoftViewerLibrary.Models.DTOs.PacsServer;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerQCSystem.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -24,30 +25,41 @@ namespace ISoftViewerQCSystem.Controllers
         /// <param name="pacsConfig"></param>
         /// <param name="service"></param>
         /// <param name="logger"></param>
-        public PacsSysConfigController(ICommonRepositoryService<SvrConfiguration> pacsConfig,
-            PacsSysConfigApplicationService service, ILogger<SearchDcmServiceController> logger)
+        public PacsSysConfigController(
+            ICommonRepositoryService<SvrConfiguration> pacsConfig,
+            PacsSysConfigApplicationService service,
+            ICommonRepositoryService<SvrConfigurationsV2> pacsConfigV2,
+            ILogger<SearchDcmServiceController> logger)
         {
             PacsConfigDbService = (DbTableService<SvrConfiguration>)pacsConfig;
+            PacsConfigDbServiceV2 = (DbTableService<SvrConfigurationsV2>)pacsConfigV2;
             ConfigAppService = service;
             Logger = logger;
         }
 
-        #region Fields        
+        #region Fields
+
         /// <summary>
         /// SystemConfiguration資料表處理服務
         /// </summary>
         private readonly DbTableService<SvrConfiguration> PacsConfigDbService;
+
+        private readonly DbTableService<SvrConfigurationsV2> PacsConfigDbServiceV2;
+
         /// <summary>
         ///  SystemConfiguration服務
         /// </summary>
         private readonly PacsSysConfigApplicationService ConfigAppService;
+
         /// <summary>
         /// 日誌記錄器
         /// </summary>
         private readonly ILogger<SearchDcmServiceController> Logger;
+
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 查詢處理
         /// </summary>
@@ -60,9 +72,7 @@ namespace ISoftViewerQCSystem.Controllers
         {
             try
             {
-                Logger.LogDebug("Handling HTTP request of type {type}", "SvrConfiguration");
-
-                if (User.Identity == null) 
+                if (User.Identity == null)
                     return BadRequest("User not exist.");
                 return Ok(await handler(User.Identity.Name, request));
             }
@@ -72,6 +82,7 @@ namespace ISoftViewerQCSystem.Controllers
                 return BadRequest(e.Message);
             }
         }
+
         /// <summary>
         /// 取得PACS SystemConfiguration
         /// </summary>
@@ -87,6 +98,29 @@ namespace ISoftViewerQCSystem.Controllers
 
             return await HandleSearch<SvrConfiguration, SvrConfiguration>(null, ConfigAppService.Handle);
         }
+
+        /// <summary>
+        /// 取得PACS SystemConfiguration
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("pacsconfigv2")]
+        public IEnumerable<SvrConfigurationsV2> GetPacsConfigDataV2()
+        {
+            return PacsConfigDbServiceV2.GetAll();
+        }
+
+        /// <summary>
+        /// 取得PACS SystemConfiguration
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("pacsconfigv2")]
+        public ActionResult UpdatePacsConfigDataV2([FromBody] SvrConfigurationsV2 configuration)
+        {
+            var result =  PacsConfigDbServiceV2.AddOrUpdate(configuration);
+            if (result == false) return BadRequest("Update failed.");
+            return Ok();
+        }
+
         /// <summary>
         /// 取得PACS SystemConfiguration Log Level
         /// </summary>
@@ -94,7 +128,8 @@ namespace ISoftViewerQCSystem.Controllers
         public ActionResult<IEnumerable<string>> GetPacsConfigeLogLevel()
         {
             return Ok(ConfigHelper.ServerMessageTypes);
-        }        
+        }
+
         /// <summary>
         /// 更新SystemConfiguration
         /// </summary>
@@ -105,11 +140,12 @@ namespace ISoftViewerQCSystem.Controllers
             data.PACSMessageWriteToLog = ConfigHelper.WebLogLevelToDb(data.PACSMessageWriteToLog);
             data.WorklistMessageWriteToLog = ConfigHelper.WebLogLevelToDb(data.WorklistMessageWriteToLog);
             data.ScheduleMessageWriteToLog = ConfigHelper.WebLogLevelToDb(data.ScheduleMessageWriteToLog);
-            
+
             if (PacsConfigDbService.AddOrUpdate(data, userName) == false)
                 return BadRequest();
             return Ok();
         }
+
         /// <summary>
         /// 取得I-SoftViewer PACS Service的啟用狀況
         /// </summary>
@@ -122,12 +158,12 @@ namespace ISoftViewerQCSystem.Controllers
             //先判斷TreaMed Window Service是否存在
             bool wndServiceIsExists = false;
             bool wndServiceIsStartup = false;
-            const string treamedWndServiceName = "TeraMedArchivingService";
+            const string teraMedArchivingService = "TeraMedArchivingService";
             ServiceController[] services = ServiceController.GetServices();
             ServiceController teramedWndService = null;
             foreach (ServiceController service in services)
             {
-                if (service.ServiceName.ToLower() == treamedWndServiceName.ToLower())
+                if (service.ServiceName.ToLower() == teraMedArchivingService.ToLower())
                 {
                     wndServiceIsExists = true;
                     wndServiceIsStartup = !(service.Status == ServiceControllerStatus.Stopped);
@@ -158,6 +194,7 @@ namespace ISoftViewerQCSystem.Controllers
                             return Ok(1);
                     }
                 }
+
                 //關閉
                 if (action == "Close")
                 {
@@ -182,7 +219,8 @@ namespace ISoftViewerQCSystem.Controllers
 
             //反之,啟動,停止失敗或不支援的參數,則回覆失敗
             return BadRequest(0);
-        }        
+        }
+
         #endregion
     }
 }

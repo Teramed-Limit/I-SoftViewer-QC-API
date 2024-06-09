@@ -31,8 +31,9 @@ namespace ISoftViewerLibrary.Logics.QCOperation
             var result = _strategy.WriteSuccessRecord();
         }
 
-        public void WriteFailedRecord()
+        public void WriteFailedRecord(string reason, string desc)
         {
+            _strategy.SetReasonAndDesc(reason, desc);
             var result = _strategy.WriteFailedRecord();
         }
     }

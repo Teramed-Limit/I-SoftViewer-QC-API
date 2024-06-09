@@ -11,5 +11,6 @@ namespace ISoftViewerLibrary.Logics.Interface
         bool WriteSuccessRecord();
         bool WriteFailedRecord();
         void SetParams(string user, string studyInstanceUID, string reason, string desc);
+        void SetReasonAndDesc(string reason, string desc);
     }
 }

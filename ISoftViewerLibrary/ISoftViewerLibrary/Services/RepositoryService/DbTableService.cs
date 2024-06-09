@@ -63,6 +63,7 @@ namespace ISoftViewerQCSystem.Services
             { "SvrDcmProviderDb", new TableMappingData() { TableName = "DicomServiceProvider", PrimaryKey = "Name" } },
             { "SvrDcmDestNode", new TableMappingData() { TableName = "DicomDestinationNodes", PrimaryKey = "LogicalName" } },
             { "SvrConfiguration", new TableMappingData() { TableName = "SystemConfiguration", PrimaryKey = "Name" } },
+            { "SvrConfigurationsV2", new TableMappingData() { TableName = "SystemConfig", PrimaryKey = "SysConfigName" } },
             { "SvrFileStorageDevice", new TableMappingData() { TableName = "StorageDevice", PrimaryKey = "StorageDeviceID" } },
             { "SvrDcmTags", new TableMappingData() { TableName = "DicomTags", PrimaryKey = "IdentifyName" } },
             { "SvrDcmTagFilters", new TableMappingData() { TableName = "DicomTagFilterDetail", PrimaryKey = "TagFilterName" } },

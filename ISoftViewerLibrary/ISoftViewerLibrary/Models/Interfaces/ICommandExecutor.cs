@@ -109,7 +109,7 @@ namespace ISoftViewerLibrary.Models.Interfaces
         /// 註冊處理資料
         /// </summary>
         /// <param name="data"></param>
-        void RegistrationData(object data);
+        Task RegistrationData(object data);
 
         /// <summary>
         /// 註冊QC處理Logger

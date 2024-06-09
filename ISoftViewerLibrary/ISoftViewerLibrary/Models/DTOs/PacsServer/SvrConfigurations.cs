@@ -113,6 +113,7 @@ namespace ISoftViewerLibrary.Models.DTOs
         /// </summary>
         [Required]
         public int DailyTimerInterval { get; set; }
+
     }
     #endregion
 

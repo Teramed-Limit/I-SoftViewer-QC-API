@@ -26,11 +26,14 @@ namespace ISoftViewerQCSystem.Controllers
         /// </summary>
         /// <param name="cmdServices"></param>
         /// <param name="logger"></param>
-        public StudyMaintenanceController(IEnumerable<IApplicationCmdService> cmdServices, ILogger<StudyMaintenanceController> logger)
+        public StudyMaintenanceController(IEnumerable<IApplicationCmdService> cmdServices,
+            ILogger<StudyMaintenanceController> logger)
         {
             Logger = logger;
             var applicationCmdServices = cmdServices as IApplicationCmdService[] ?? cmdServices.ToArray();
-            DcmStudyMaintenanceService = (DcmDataCmdApplicationService)applicationCmdServices.Single(x => x.CmdServiceType == CmdServiceType.DcmData);
+            DcmStudyMaintenanceService =
+                (DcmDataCmdApplicationService)applicationCmdServices.Single(x =>
+                    x.CmdServiceType == CmdServiceType.DcmData);
             StudyQcApplicationService = applicationCmdServices.Single(x => x.CmdServiceType == CmdServiceType.StudyQC);
         }
 
@@ -46,13 +49,13 @@ namespace ISoftViewerQCSystem.Controllers
             try
             {
                 Logger.LogTrace("Handling HTTP command of type {type}", typeof(T).Name);
-                if(User.Identity == null) return BadRequest("User not exist.");
+                if (User.Identity == null) return BadRequest("User not exist.");
                 await handler(User.Identity.Name, command);
                 return Ok();
             }
             catch (Exception e)
             {
-                Logger.LogError("Error handling the request", e);
+                // Logger.LogError("Error handling the request", e);
                 return BadRequest(e.Message);
             }
         }
@@ -62,7 +65,8 @@ namespace ISoftViewerQCSystem.Controllers
         /// </summary>
         /// <param name="value"></param>
         [HttpPost]
-        public Task<IActionResult> Post([FromBody] DataCorrection.V1.CreateAndModifyStudy<DataCorrection.V1.ImageBufferAndData> value)
+        public Task<IActionResult> Post(
+            [FromBody] DataCorrection.V1.CreateAndModifyStudy<DataCorrection.V1.ImageBufferAndData> value)
         {
             return HandleCommand(value, DcmStudyMaintenanceService.Handle);
         }
@@ -95,7 +99,20 @@ namespace ISoftViewerQCSystem.Controllers
         /// <param name="value"></param>
         [Route("mapping")]
         [HttpPut]
-        public Task<IActionResult> Put([FromBody] DataCorrection.V1.StudyMappingParameter value)
+        public Task<IActionResult> Put(
+            [FromBody] DataCorrection.V1.StudyMappingParameter<DataCorrection.V1.DcmTagData> value)
+        {
+            return HandleCommand(value, StudyQcApplicationService.Handle);
+        }
+
+        /// <summary>
+        ///     病歷檢查資料與外部資料做資料批配校正
+        /// </summary>
+        /// <param name="value"></param>
+        [Route("mapping/multi")]
+        [HttpPut]
+        public Task<IActionResult> PutMulti(
+            [FromBody] DataCorrection.V1.StudyMappingParameter<List<DataCorrection.V1.DcmTagData>> value)
         {
             return HandleCommand(value, StudyQcApplicationService.Handle);
         }

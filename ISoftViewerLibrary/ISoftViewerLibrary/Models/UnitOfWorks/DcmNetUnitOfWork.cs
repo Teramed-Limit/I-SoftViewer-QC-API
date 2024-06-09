@@ -258,13 +258,13 @@ namespace ISoftViewerLibrary.Models.UnitOfWorks
                 };
 
                 Serilog.Log.Debug("===============Request Dataset===============");
-                await new DicomDatasetWalker(request.Dataset).WalkAsync(new DatasetWalker());
+                await new DicomDatasetWalker(request.Dataset).WalkAsync(new LogDatasetWalker());
                 Serilog.Log.Debug("=============================================");
                 request.OnResponseReceived += (req, response) =>
                 {
                     if (response.Dataset == null) return;
                     Serilog.Log.Debug("=============================================");
-                    new DicomDatasetWalker(response.Dataset).Walk(new DatasetWalker());
+                    new DicomDatasetWalker(response.Dataset).Walk(new LogDatasetWalker());
                     DcmDatasets.Add(response.Dataset);
                 };
                 DcmDatasets.Clear();
@@ -297,7 +297,7 @@ namespace ISoftViewerLibrary.Models.UnitOfWorks
                 cfindRq.Dataset = new DicomDataset(dataset);
 
                 Serilog.Log.Debug("=====================Request Dataset=====================");
-                await new DicomDatasetWalker(cfindRq.Dataset).WalkAsync(new DatasetWalker());
+                await new DicomDatasetWalker(cfindRq.Dataset).WalkAsync(new LogDatasetWalker());
                 cfindRq.OnResponseReceived = (DicomCFindRequest rq, DicomCFindResponse rp) =>
                 {
                     if (rp.HasDataset)
@@ -305,7 +305,7 @@ namespace ISoftViewerLibrary.Models.UnitOfWorks
                         ServiceMessages.Add(
                             $"Study UID: {rp.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID)}");
                         Serilog.Log.Debug("=============================================");
-                        new DicomDatasetWalker(rp.Dataset).Walk(new DatasetWalker());
+                        new DicomDatasetWalker(rp.Dataset).Walk(new LogDatasetWalker());
                         DcmDatasets.Add(rp.Dataset);
                     }
                     else
@@ -383,7 +383,7 @@ namespace ISoftViewerLibrary.Models.UnitOfWorks
                 }
 
                 Serilog.Log.Debug($"*** Request Dataset ***");
-                await new DicomDatasetWalker(cMoveRequest.Dataset).WalkAsync(new DatasetWalker());
+                await new DicomDatasetWalker(cMoveRequest.Dataset).WalkAsync(new LogDatasetWalker());
                 cMoveRequest.OnResponseReceived += (DicomCMoveRequest request, DicomCMoveResponse response) =>
                 {
                     if (response.Status.State == DicomState.Pending)

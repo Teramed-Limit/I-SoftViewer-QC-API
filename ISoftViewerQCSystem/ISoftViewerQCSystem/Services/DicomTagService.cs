@@ -83,7 +83,7 @@ namespace ISoftViewerQCSystem.Services
 
             var dataset = DicomFile.Open(filePath).Dataset;
 
-            new DicomDatasetWalker(dataset).Walk(new DatasetWalker(AddItem));
+            new DicomDatasetWalker(dataset).Walk(new LogDatasetWalker(AddItem));
             return _tagDataList;
         }
 

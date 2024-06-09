@@ -8,19 +8,19 @@ namespace ISoftViewerLibrary.Utils
     public delegate void CollectItemDelegate(
         int level, DicomTag tag, string name, string vr, string length, string value);
 
-    public class DatasetWalker : IDicomDatasetWalker
+    public class LogDatasetWalker : IDicomDatasetWalker
     {
         private readonly CollectItemDelegate _collectItem;
         private int _level;
 
-        public DatasetWalker(CollectItemDelegate collectItem)
+        public LogDatasetWalker(CollectItemDelegate collectItem)
         {
             _collectItem = collectItem;
             Level = 0;
             SequenceEnd = false;
         }
 
-        public DatasetWalker()
+        public LogDatasetWalker()
         {
             Level = 0;
             SequenceEnd = false;
@@ -89,23 +89,24 @@ namespace ISoftViewerLibrary.Utils
 
         public bool OnBeginSequence(DicomSequence sequence)
         {
-            SequenceEnd = false;
+            // SequenceEnd = false;
             var tag = $"{Indent}{sequence.Tag.ToString().ToUpper()}";
             Log.Debug($"{tag} {sequence.Tag.DictionaryEntry.Name}");
-            _collectItem?.Invoke(Level,
-                sequence.Tag,
-                sequence.Tag.DictionaryEntry.Name,
-                sequence.ValueRepresentation.Code,
-                string.Empty,
-                string.Empty);
             Level++;
+            return true;
+        }
+
+        public bool OnEndSequence()
+        {
+            Level--;
             return true;
         }
 
         public bool OnBeginSequenceItem(DicomDataset dataset)
         {
+            SequenceEnd = false;
             var tag = $"{Indent}{DicomTag.Item.ToString().ToUpper()}";
-            // Log.Debug($"{tag} {DicomTag.Item.DictionaryEntry.Name}");
+            Log.Debug($"{tag} {DicomTag.Item.DictionaryEntry.Name}");
             _collectItem?.Invoke(Level, DicomTag.Item, DicomTag.Item.DictionaryEntry.Name, string.Empty, string.Empty,
                 string.Empty);
             Level++;
@@ -114,38 +115,30 @@ namespace ISoftViewerLibrary.Utils
 
         public bool OnEndSequenceItem()
         {
+            SequenceEnd = true;
             Level--;
+            var tag = $"{Indent}{DicomTag.ItemDelimitationItem.ToString().ToUpper()}";
+            Log.Debug($"{tag} {DicomTag.ItemDelimitationItem.DictionaryEntry.Name}");
             return true;
         }
 
-        public bool OnEndSequence()
-        {
-            SequenceEnd = true;
-            var tag = $"{Indent}{DicomTag.ItemDelimitationItem.ToString().ToUpper()}";
-            // Log.Debug($"{tag} {DicomTag.ItemDelimitationItem.DictionaryEntry.Name}");
-            _collectItem?.Invoke(Level, DicomTag.ItemDelimitationItem,
-                DicomTag.ItemDelimitationItem.DictionaryEntry.Name, string.Empty, string.Empty,
-                string.Empty);
-            Level--;
-            return true;
-        }
 
         public bool OnBeginFragment(DicomFragmentSequence fragment)
         {
-            var tag = $"{Indent}{fragment.Tag.ToString().ToUpper()}";
-            _collectItem?.Invoke(Level, fragment.Tag, fragment.Tag.DictionaryEntry.Name,
-                fragment.ValueRepresentation.Code,
-                string.Empty,
-                string.Empty);
+            // var tag = $"{Indent}{fragment.Tag.ToString().ToUpper()}";
+            // _collectItem?.Invoke(Level, fragment.Tag, fragment.Tag.DictionaryEntry.Name,
+            //     fragment.ValueRepresentation.Code,
+            //     string.Empty,
+            //     string.Empty);
             Level++;
             return true;
         }
 
         public bool OnFragmentItem(IByteBuffer item)
         {
-            var tag = $"{Indent}Fragment";
-            _collectItem?.Invoke(Level, DicomTag.Item, DicomTag.Item.DictionaryEntry.Name, string.Empty,
-                item.Size.ToString(), string.Empty);
+            // var tag = $"{Indent}Fragment";
+            // _collectItem?.Invoke(Level, DicomTag.Item, DicomTag.Item.DictionaryEntry.Name, string.Empty,
+            //     item.Size.ToString(), string.Empty);
             return true;
         }
 

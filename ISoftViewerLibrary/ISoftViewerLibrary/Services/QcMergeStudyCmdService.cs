@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ISoftViewerLibrary.Logics.QCOperation;
 using ISoftViewerLibrary.Model.DicomOperator;
+using ISoftViewerLibrary.Models.DTOs.PacsServer;
 using ISoftViewerLibrary.Models.Events;
 
 namespace ISoftViewerLibrary.Services
@@ -29,11 +30,10 @@ namespace ISoftViewerLibrary.Services
         /// <param name="dbQryService"></param>
         /// <param name="dbCmdService"></param>
         /// <param name="environmentConfiguration"></param>
-        /// <param name="dcmUnitOfWork"></param>
-        /// <param name="dcmCqusDatasts"></param>
-        public QcMergeStudyCmdService(
-            DbQueriesService<CustomizeTable> dbQryService, DbCommandService<CustomizeTable> dbCmdService,
-            EnvironmentConfiguration environmentConfiguration) 
+        /// <param name="svrConfiguration"></param>
+        public QcMergeStudyCmdService(DbQueriesService<CustomizeTable> dbQryService,
+            DbCommandService<CustomizeTable> dbCmdService,
+            EnvironmentConfiguration environmentConfiguration, IEnumerable<SvrConfigurationsV2> svrConfiguration) 
             : base(dbQryService)
         {
             DbCmdService = dbCmdService;
@@ -68,11 +68,12 @@ namespace ISoftViewerLibrary.Services
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 註冊資料
         /// </summary>
         /// <param name="data"></param>
-        public override void RegistrationData(object data) 
+        public override async Task RegistrationData(object data) 
         {
             Data = (DataCorrection.V1.MergeStudyParameter)data;
         }
@@ -230,7 +231,7 @@ namespace ISoftViewerLibrary.Services
                 //FailedToDeleteNewImageFiles();
                 Messages.Add(ex.Message);
                 Result = OpResult.OpFailure;
-                OperationContext.WriteFailedRecord();
+                // OperationContext.WriteFailedRecord(ex.Message, ex.ToString());
                 throw new Exception(Message);
             }
             Result = OpResult.OpSuccess;

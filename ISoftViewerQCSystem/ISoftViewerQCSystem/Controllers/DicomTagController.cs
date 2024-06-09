@@ -101,7 +101,7 @@ namespace ISoftViewerQCSystem.Controllers
                     modifyTag.Group,
                     modifyTag.Element,
                     modifyTag.Value,
-                    _dicomOperationNodeService.GetTeramedCStoreNode());
+                    _dicomOperationNodeService.GetLocalCStoreNode());
                 return result ? Ok() : BadRequest("Unexpected error");
             }
             catch (Exception e)

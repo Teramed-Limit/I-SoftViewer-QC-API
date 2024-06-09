@@ -9,7 +9,7 @@
         public string AETitle { get; set; }
 
         public string RemoteAETitle { get; set; }
-        
+
         public string IPAddress { get; set; }
 
         public int Port { get; set; }
@@ -27,9 +27,9 @@
         public string ModifiedUser { get; set; }
 
         public int Enable { get; set; }
-        
+
         public string CFindReqField { get; set; }
         
-        public string MappingField { get; set; }
+        public int IsLocalStoreService { get; set; }
     }
 }

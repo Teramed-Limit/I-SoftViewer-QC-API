@@ -10,6 +10,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ISoftViewerLibrary.Logics.QCOperation;
+using ISoftViewerLibrary.Models.DTOs.PacsServer;
+using ISoftViewerLibrary.Services.RepositoryService.Interface;
+using ISoftViewerQCSystem.Services;
 using static ISoftViewerLibrary.Models.DTOs.DataCorrection.V1;
 
 namespace ISoftViewerQCSystem.Applications
@@ -17,7 +20,7 @@ namespace ISoftViewerQCSystem.Applications
     /// <summary>
     /// Study QC應用層服務
     /// </summary>
-    public class StudyQcApplicationService : IApplicationCmdService        
+    public class StudyQcApplicationService : IApplicationCmdService
     {
         /// <summary>
         /// 建構
@@ -29,10 +32,17 @@ namespace ISoftViewerQCSystem.Applications
         /// <param name="dcmCqusDatasts"></param>
         /// <param name="config"></param>
         /// <param name="qcOperationContext"></param>
-        public StudyQcApplicationService(ILogger<StudyQcApplicationService> logger, DbQueriesService<CustomizeTable> dbQryService, 
-            DbCommandService<CustomizeTable> dbCmdService, IDcmUnitOfWork dcmUnitOfWork, IDcmCqusDatasets dcmCqusDatasts,
-            EnvironmentConfiguration config, QCOperationContext qcOperationContext)
-        {            
+        /// <param name="pacsConfigDbServiceV2"></param>
+        public StudyQcApplicationService(
+            ILogger<StudyQcApplicationService> logger,
+            DbQueriesService<CustomizeTable> dbQryService,
+            DbCommandService<CustomizeTable> dbCmdService,
+            IDcmUnitOfWork dcmUnitOfWork,
+            IDcmCqusDatasets dcmCqusDatasts,
+            EnvironmentConfiguration config,
+            QCOperationContext qcOperationContext,
+            ICommonRepositoryService<SvrConfigurationsV2> pacsConfigDbServiceV2)
+        {
             Logger = logger;
             DbQryService = dbQryService;
             DbCmdService = dbCmdService;
@@ -40,44 +50,60 @@ namespace ISoftViewerQCSystem.Applications
             DcmCqusDatasets = dcmCqusDatasts;
             EnvirConfig = config;
             QCOperationContext = qcOperationContext;
+            PacsConfigDbServiceV2 = (DbTableService<SvrConfigurationsV2>)pacsConfigDbServiceV2;
         }
 
-        #region Fields        
+        #region Fields
+
         /// <summary>
         /// 資料庫查詢服務
         /// </summary>
         private readonly DbQueriesService<CustomizeTable> DbQryService;
+
         /// <summary>
         /// 資料庫異動命令服務
         /// </summary>
         private readonly DbCommandService<CustomizeTable> DbCmdService;
+
         /// <summary>
         /// DICOM服務單一作業流程
         /// </summary>
         protected IDcmUnitOfWork DcmUnitOfWork;
+
         /// <summary>
         /// Dataset Repository輔助物件
         /// </summary>
-        protected IDcmCqusDatasets DcmCqusDatasets;        
+        protected IDcmCqusDatasets DcmCqusDatasets;
+
         /// <summary>
         /// 日誌記錄器
         /// </summary>
         private readonly ILogger<StudyQcApplicationService> Logger;
+
         /// <summary>
         /// 環境全域組態
         /// </summary>
         private readonly EnvironmentConfiguration EnvirConfig;
+
         /// <summary>
         /// Service type
         /// </summary>
         public CmdServiceType CmdServiceType { get; } = CmdServiceType.StudyQC;
+
         /// <summary>
         ///     使用者QC操作記錄器
         /// </summary>
         private readonly QCOperationContext QCOperationContext;
+
+        /// <summary>
+        ///  SystemConfiguration服務
+        /// </summary>
+        private readonly DbTableService<SvrConfigurationsV2> PacsConfigDbServiceV2;
+
         #endregion
 
         #region Methods
+
         /// <summary>
         /// 命令處理
         /// </summary>
@@ -86,6 +112,7 @@ namespace ISoftViewerQCSystem.Applications
         /// <returns></returns>
         public Task<Queries.V1.CommandResult> Handle(string userName, object command)
         {
+            var svrConfiguration = PacsConfigDbServiceV2.GetAll();
             Queries.V1.CommandResult result = new();
             string message = string.Empty;
             try
@@ -94,42 +121,62 @@ namespace ISoftViewerQCSystem.Applications
                 switch (command)
                 {
                     case MergeStudyParameter cmd:
-                        using (IAsyncCommandExecutor studyMergeCmd = new QcMergeStudyCmdService(DbQryService, DbCmdService, EnvirConfig))
+                        using (IAsyncCommandExecutor studyMergeCmd =
+                               new QcMergeStudyCmdService(DbQryService, DbCmdService, EnvirConfig, svrConfiguration))
                         {
                             studyMergeCmd.RegistrationData(cmd);
                             studyMergeCmd.RegistrationOperationContext(QCOperationContext);
                             result.ExecuteResult = studyMergeCmd.Execute().Result;
                             message = studyMergeCmd.Message;
-                        }                            
+                        }
+
                         break;
                     case SplitStudyParameter cmd:
-                        using (IAsyncCommandExecutor studySplitCmd = new QcSplitStudyCmdService(DbQryService, DbCmdService, EnvirConfig))
+                        using (IAsyncCommandExecutor studySplitCmd =
+                               new QcSplitStudyCmdService(DbQryService, DbCmdService, EnvirConfig, svrConfiguration))
                         {
                             studySplitCmd.RegistrationData(cmd);
                             studySplitCmd.RegistrationOperationContext(QCOperationContext);
                             result.ExecuteResult = studySplitCmd.Execute().Result;
                             message = studySplitCmd.Message;
-                        }                        
+                        }
+
                         break;
-                    case StudyMappingParameter cmd:
-                        using (IAsyncCommandExecutor studyMappingCmd = new QcMappingStudyCmdService(DbQryService, DbCmdService,
-                            DcmUnitOfWork, DcmCqusDatasets, EnvirConfig))
+                    case StudyMappingParameter<DcmTagData> cmd:
+                        using (IAsyncCommandExecutor studyMappingCmd = new QcMappingStudyCmdService(DbQryService,
+                                   DbCmdService,
+                                   DcmUnitOfWork, DcmCqusDatasets, EnvirConfig, svrConfiguration))
                         {
                             studyMappingCmd.RegistrationData(cmd);
                             studyMappingCmd.RegistrationOperationContext(QCOperationContext);
                             result.ExecuteResult = studyMappingCmd.Execute().Result;
                             message = studyMappingCmd.Message;
                         }
+
+                        break;
+                    case StudyMappingParameter<List<DcmTagData>> cmd:
+                        using (IAsyncCommandExecutor studyMultiMappingCmd = new QcMappingMultiStudyCmdService(
+                                   DbQryService, DbCmdService,
+                                   DcmUnitOfWork, DcmCqusDatasets, EnvirConfig, svrConfiguration))
+                        {
+                            studyMultiMappingCmd.RegistrationData(cmd);
+                            studyMultiMappingCmd.RegistrationOperationContext(QCOperationContext);
+                            result.ExecuteResult = studyMultiMappingCmd.Execute().Result;
+                            message = studyMultiMappingCmd.Message;
+                        }
+
                         break;
                     case StudyUnmappingParameter cmd:
-                        using (IAsyncCommandExecutor studyUnmappingCmd = new QcUnmappingStudyCdmService(DbQryService, DbCmdService,
-                            DcmUnitOfWork, DcmCqusDatasets, EnvirConfig))
+                        using (IAsyncCommandExecutor studyUnmappingCmd = new QcUnmappingStudyCdmService(DbQryService,
+                                   DbCmdService,
+                                   DcmUnitOfWork, DcmCqusDatasets, EnvirConfig, svrConfiguration))
                         {
                             studyUnmappingCmd.RegistrationData(cmd);
                             studyUnmappingCmd.RegistrationOperationContext(QCOperationContext);
                             result.ExecuteResult = studyUnmappingCmd.Execute().Result;
                             message = studyUnmappingCmd.Message;
                         }
+
                         break;
                 }
 
@@ -143,8 +190,10 @@ namespace ISoftViewerQCSystem.Applications
                 result.ExecuteResult = false;
                 throw new Exception(ex.Message);
             }
+
             return Task.FromResult(result);
         }
+
         #endregion
     }
 }

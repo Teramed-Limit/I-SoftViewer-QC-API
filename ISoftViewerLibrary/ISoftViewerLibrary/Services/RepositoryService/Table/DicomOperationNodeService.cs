@@ -1,4 +1,5 @@
-﻿using ISoftViewerLibrary.Models.DTOs;
+﻿using System;
+using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.Interfaces;
 using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
@@ -9,22 +10,25 @@ namespace ISoftViewerLibrary.Services.RepositoryService.Table
 {
     public class DicomOperationNodeService : CommonRepositoryService<DicomOperationNodes>
     {
-        private readonly EnvironmentConfiguration _config;
-
-        public DicomOperationNodeService(PacsDBOperationService dbOperator, EnvironmentConfiguration config)
+        public DicomOperationNodeService(PacsDBOperationService dbOperator)
             : base("DicomOperationNodes", dbOperator)
         {
             PrimaryKey = "Name";
-            _config = config;
         }
 
-        public DicomOperationNodes GetTeramedCStoreNode()
+        public DicomOperationNodes GetLocalCStoreNode()
         {
-            var host = _config.DcmSendIP;
-            var port = _config.DcmSendPort;
-            var callingAE = _config.CallingAeTitle;
-            var calledAE = _config.CalledAeTitle;
-            
+            var dicomOperationNodes = GetAll();
+            var node = dicomOperationNodes.First(x => x.IsLocalStoreService == 1);
+
+            if (node == null)
+                throw new Exception("Can't find Teramed C-Store node");
+
+            var host = node.IPAddress;
+            var port = node.Port;
+            var callingAE = node.AETitle;
+            var calledAE = node.RemoteAETitle;
+
             return new DicomOperationNodes
             {
                 RemoteAETitle = calledAE,
@@ -34,20 +38,20 @@ namespace ISoftViewerLibrary.Services.RepositoryService.Table
             };
         }
 
-        public bool IsTeramedCStoreNode(DicomOperationNodes node)
+        public bool IsLocalCStoreNode(DicomOperationNodes node)
         {
-            var teramedNode = GetTeramedCStoreNode();
+            var localNode = GetLocalCStoreNode();
 
-            return node.IPAddress == teramedNode.IPAddress && 
-                   node.Port == teramedNode.Port && 
-                   node.AETitle == teramedNode.AETitle && 
-                   node.RemoteAETitle == teramedNode.RemoteAETitle;
+            return node.IPAddress == localNode.IPAddress &&
+                   node.Port == localNode.Port &&
+                   node.AETitle == localNode.AETitle &&
+                   node.RemoteAETitle == localNode.RemoteAETitle;
         }
 
         public List<DicomOperationNodes> GetAllCStoreNode()
         {
             var list = GetEnableCStoreNode();
-            list.Add(GetTeramedCStoreNode());
+            list.Add(GetLocalCStoreNode());
             return list;
         }
 

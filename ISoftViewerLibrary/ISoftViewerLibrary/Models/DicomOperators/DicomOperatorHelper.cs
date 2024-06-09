@@ -3,14 +3,38 @@ using Dicom.IO;
 using Dicom.IO.Buffer;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using ISoftViewerLibrary.Models.DTOs;
+using ISoftViewerLibrary.Models.ValueObjects;
+using Newtonsoft.Json;
 
 namespace ISoftViewerLibrary.Model.DicomOperator
 {
     public class DicomOperatorHelper
     {
+        # region Constructor
+
+        public DicomOperatorHelper()
+        {
+            // 看有沒有appsetting.json，從裡面取得設定值，直接找檔案
+            var settingsFile = AppDomain.CurrentDomain.BaseDirectory + "appsettings.json";
+            if (!File.Exists(settingsFile)) return;
+
+            // 直接解析json檔案
+            using (StreamReader r = new StreamReader(settingsFile))
+            {
+                string json = r.ReadToEnd();
+                var settings = JsonConvert.DeserializeObject<EnvironmentConfiguration>(json);
+                AnsiEncoding = Encoding.GetEncoding(settings.AnsiEncoding);
+            }
+        }
+
+        public Encoding AnsiEncoding { get; set; } = Encoding.GetEncoding("big5");
+
+        # endregion
+
         #region GetDicomValueToStringWithGroupAndElem
 
         /// <summary>
@@ -35,6 +59,148 @@ namespace ISoftViewerLibrary.Model.DicomOperator
             value = value.Replace('\0', ' ').Trim();
 
             return value;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dataset"></param>
+        /// <param name="tag"></param>
+        /// <param name="isUtf8"></param>
+        /// <returns></returns>
+        public string GetDicomValueToStringWithGroupAndElem(DicomDataset dataset, string tag, bool isUtf8)
+        {
+            // 代表是Sequence的Tag
+            if (tag.Contains("|"))
+            {
+                string[] tags = tag.Split('|');
+                return GetDicomValueRecursive(dataset, tags, 0, isUtf8);
+            }
+            else
+            {
+                var tagArray = tag.Split(',');
+                ushort group = Convert.ToUInt16(tagArray[0], 16);
+                ushort elem = Convert.ToUInt16(tagArray[1], 16);
+                DicomTag dcmTag = new DicomTag(group, elem);
+
+                if (dataset.Contains(dcmTag) == false)
+                    return "";
+                //判斷是那一種型態
+                var entry = DicomDictionary.Default[dcmTag];
+                DicomVR vr = entry.ValueRepresentations.First();
+
+                string value = GetDicomValueToString(dataset, dcmTag, vr, isUtf8).Trim();
+                value = value.Replace('\0', ' ').Trim();
+
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// 取得指定 DcmTagData 的 value
+        /// </summary>
+        /// <param name="dicomTags">DICOM Tag 資料列表</param>
+        /// <param name="tagPath">Tag 路徑</param>
+        /// <returns>對應的 DcmTagData 的 value</returns>
+        public string GetDicomValueToStringWithDcmTagData(List<DataCorrection.V1.DcmTagData> dicomTags, string tagPath)
+        {
+            var tags = tagPath.Split('|');
+            return GetDcmTagDataValueRecursive(dicomTags, tags, 0);
+        }
+        
+        public DicomTag ConvertStringToDicomTag(string tagString)
+        {
+            // 檢查輸入的字串格式是否正確
+            if (tagString.Length != 9 || tagString[4] != ',')
+            {
+                throw new ArgumentException("String format is incorrect, should be 'XXXX,XXXX' format");
+            }
+
+            // 分割字串，取得群組和元素部分
+            string[] parts = tagString.Split(',');
+            string groupPart = parts[0];
+            string elementPart = parts[1];
+
+            // 將群組和元素部分轉換為整數
+            ushort group = ushort.Parse(groupPart, System.Globalization.NumberStyles.HexNumber);
+            ushort element = ushort.Parse(elementPart, System.Globalization.NumberStyles.HexNumber);
+
+            // 建立並返回DicomTag物件
+            return new DicomTag(group, element);
+        }
+        
+
+        /// <summary>
+        /// 遞迴取得 DcmTagData 的 value
+        /// </summary>
+        /// <param name="dicomTags">DICOM Tag 資料列表</param>
+        /// <param name="tags">Tag 路徑陣列</param>
+        /// <param name="index">目前處理的 Tag 索引</param>
+        /// <returns>對應的 DcmTagData 的 value</returns>
+        private static string GetDcmTagDataValueRecursive(List<DataCorrection.V1.DcmTagData> dicomTags, string[] tags,
+            int index)
+        {
+            if (index >= tags.Length)
+            {
+                return string.Empty;
+            }
+
+            var tagParts = tags[index].Split(',');
+            if (tagParts.Length != 2)
+            {
+                throw new ArgumentException("Invalid tag format, should be 'gggg,eeee' but got '" + tags[index] + "'");
+            }
+
+            var group = Convert.ToUInt32(tagParts[0], 16);
+            var elem = Convert.ToUInt32(tagParts[1], 16);
+
+            var currentTag = dicomTags.Find(tag => tag.Group == group && tag.Elem == elem);
+            if (currentTag == null)
+            {
+                return string.Empty;
+            }
+
+            if (index == tags.Length - 1)
+            {
+                return currentTag.Value;
+            }
+
+            return GetDcmTagDataValueRecursive(currentTag.SeqDcmTagData, tags, index + 1);
+        }
+
+        private static string GetDicomValueRecursive(DicomDataset dataset, string[] tags, int index, bool isUtf8)
+        {
+            if (index >= tags.Length) return null;
+
+            string[] parts = tags[index].Split(',');
+            ushort group = Convert.ToUInt16(parts[0], 16);
+            ushort elem = Convert.ToUInt16(parts[1], 16);
+            DicomTag dicomTag = new DicomTag(group, elem);
+
+            var entry = DicomDictionary.Default[dicomTag];
+            DicomVR vr = entry.ValueRepresentations.First();
+            var isSequence = vr == DicomVR.SQ;
+
+            if (isSequence)
+            {
+                // 如果是序列，遍歷序列中的每一個項目
+                if (dataset.TryGetSequence(dicomTag, out DicomSequence sequence))
+                {
+                    foreach (var item in sequence.Items)
+                    {
+                        string value = GetDicomValueRecursive(item, tags, index + 1, isUtf8);
+                        if (value != null) return value;
+                    }
+                }
+            }
+            else
+            {
+                // 如果不是序列，返回對應的值
+                return new DicomOperatorHelper()
+                    .GetDicomValueToStringWithGroupAndElem(dataset, dicomTag.Group, dicomTag.Element, isUtf8);
+            }
+
+            return null; // 如果最終未找到目標 tag，返回空
         }
 
         #endregion
@@ -65,11 +231,14 @@ namespace ISoftViewerLibrary.Model.DicomOperator
                 {
                     string value = "";
                     if (isUTF8Encoding)
-                        value = Encoding.UTF8.GetString(element.Buffer.Data);
+                    {
+                        var utf8Encoding = Encoding.GetEncoding("utf-8");
+                        value = utf8Encoding.GetString(element.Buffer.Data);
+                    }
+
                     else
                     {
-                        var big5Encoding = Encoding.GetEncoding(950);
-                        value = big5Encoding.GetString(element.Buffer.Data);
+                        value = AnsiEncoding.GetString(element.Buffer.Data);
                     }
 
                     result = value;
@@ -145,8 +314,8 @@ namespace ISoftViewerLibrary.Model.DicomOperator
                 }
                 else
                 {
-                    characterSetCode = Encoding.GetEncoding("big5");
-                    buffer = ByteConverter.ToByteBuffer(value ?? String.Empty, Encoding.GetEncoding("big5"), 32);
+                    characterSetCode = AnsiEncoding;
+                    buffer = ByteConverter.ToByteBuffer(value ?? String.Empty, characterSetCode, 32);
                 }
 
                 if (vr == DicomVR.LO)
@@ -234,6 +403,7 @@ namespace ISoftViewerLibrary.Model.DicomOperator
 
         public void ConvertTagStringToUIntGE(string tag, out ushort group, out ushort elem)
         {
+           
             group = 0;
             elem = 0;
             //判斷是否為Sequence的Tag
@@ -337,8 +507,7 @@ namespace ISoftViewerLibrary.Model.DicomOperator
                         value = Encoding.UTF8.GetString(dicomString.Buffer.Data);
                     else
                     {
-                        var big5Encoding = Encoding.GetEncoding(950);
-                        value = big5Encoding.GetString(dicomString.Buffer.Data);
+                        value = AnsiEncoding.GetString(dicomString.Buffer.Data);
                     }
                 }
                 else if (dVR == DicomVR.FD || dVR == DicomVR.FL || dVR == DicomVR.OF || dVR == DicomVR.OD ||
@@ -454,5 +623,97 @@ namespace ISoftViewerLibrary.Model.DicomOperator
         }
 
         #endregion
+
+        public bool IsSequenceTag(DicomTag dicomTag)
+        {
+            var entry = DicomDictionary.Default[dicomTag];
+            DicomVR vr = entry.ValueRepresentations.First();
+            return vr == DicomVR.SQ;
+        }
+
+        public List<DataCorrection.V1.DcmTagData> ConvertDicomDatasetToDcmTagDataList(
+            DicomDataset dataset,
+            List<MappingTag> mappingTags,
+            DicomOperatorHelper dcmHelper,
+            bool isUtf8)
+        {
+            var dcmTagDataList = new List<DataCorrection.V1.DcmTagData>();
+
+            foreach (var mappingTag in mappingTags)
+            {
+                // Mapping 記錄要轉換所有第一層Tag，如果有深層的Tag，就不處理
+                if (mappingTag.ToTag.Contains("|")) continue;
+                DicomTag dicomTag = DicomTag.Parse(mappingTag.ToTag);
+
+                if (dataset.Contains(dicomTag) && dataset.GetDicomItem<DicomSequence>(dicomTag) != null)
+                {
+                    var sequence = dataset.GetDicomItem<DicomSequence>(dicomTag);
+                    var seqDcmTagData = new DataCorrection.V1.DcmTagData
+                    {
+                        Keyword = sequence.Tag.DictionaryEntry.Keyword,
+                        Name = sequence.Tag.ToString(),
+                        Group = sequence.Tag.Group,
+                        Elem = sequence.Tag.Element,
+                        SeqDcmTagData = new List<DataCorrection.V1.DcmTagData>()
+                    };
+
+                    if (sequence.Items.Any())
+                    {
+                        foreach (var sequenceItem in sequence.Items)
+                        {
+                            ProcessSequenceItem(sequenceItem, seqDcmTagData, dcmHelper, isUtf8);
+                        }
+                        dcmTagDataList.Add(seqDcmTagData);
+                    }
+                }
+                else
+                {
+                    var dcmTagData = new DataCorrection.V1.DcmTagData
+                    {
+                        Keyword = dicomTag.DictionaryEntry.Keyword,
+                        Name = dicomTag.ToString(),
+                        Group = dicomTag.Group,
+                        Elem = dicomTag.Element,
+                        SeqDcmTagData = new List<DataCorrection.V1.DcmTagData>(),
+                        Value = dcmHelper.GetDicomValueToStringWithGroupAndElem(dataset, mappingTag.ToTag, isUtf8)
+                    };
+
+                    dcmTagDataList.Add(dcmTagData);
+                }
+            }
+
+            return dcmTagDataList;
+        }
+        
+        private void ProcessSequenceItem(DicomDataset sequenceItem, DataCorrection.V1.DcmTagData parentTagData, DicomOperatorHelper dcmHelper, bool isUtf8)
+        {
+            foreach (var dicomItem in sequenceItem)
+            {
+                var dicomTag = dicomItem.Tag;
+                var seqDcmTagData = new DataCorrection.V1.DcmTagData
+                {
+                    Keyword = dicomTag.DictionaryEntry.Keyword,
+                    Name = dicomTag.ToString(),
+                    Group = dicomTag.Group,
+                    Elem = dicomTag.Element,
+                    SeqDcmTagData = new List<DataCorrection.V1.DcmTagData>()
+                };
+
+                if (dicomItem is DicomSequence subSequence)
+                {
+                    foreach (var subSequenceItem in subSequence.Items)
+                    {
+                        ProcessSequenceItem(subSequenceItem, seqDcmTagData, dcmHelper, isUtf8);
+                    }
+                }
+                else
+                {
+                    var tagString = dicomTag.ToString().Replace("(","").Replace(")","");
+                    seqDcmTagData.Value = dcmHelper.GetDicomValueToStringWithGroupAndElem(sequenceItem, tagString, isUtf8);
+                }
+
+                parentTagData.SeqDcmTagData.Add(seqDcmTagData);
+            }
+        }
     }
 }

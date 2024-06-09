@@ -24,11 +24,11 @@ namespace ISoftViewerLibrary.Logics.QCOperation
         {
             OperationRecordService = operationRecordService;
             DicomStudyService = dicomStudyService;
-
         }
 
         public bool WriteSuccessRecord()
         {
+            if (!ValidParams()) return true;
             OperationRecord.IsSuccess = 1;
             OperationRecordService.GenerateNewTransaction();
             return !OperationRecordService.Insert(OperationRecord, null);
@@ -36,11 +36,19 @@ namespace ISoftViewerLibrary.Logics.QCOperation
 
         public bool WriteFailedRecord()
         {
+            if (!ValidParams()) return true;
             OperationRecord.IsSuccess = 1;
             OperationRecordService.GenerateNewTransaction();
             return !OperationRecordService.Insert(OperationRecord, null);
         }
 
+
+        private bool ValidParams()
+        {
+            return !string.IsNullOrEmpty(OperationRecord.QCGuid) &&
+                   !string.IsNullOrEmpty(OperationRecord.Operator) &&
+                   !string.IsNullOrEmpty(OperationRecord.OperationName);
+        }
 
         public void SetParams(string user, string studyInstanceUID, string reason, string desc)
         {
@@ -48,8 +56,9 @@ namespace ISoftViewerLibrary.Logics.QCOperation
             var retryTimes = 0;
             while ((studyDatas == null || !studyDatas.Any()))
             {
-                // Thread.Sleep(2000);
                 studyDatas = DicomStudyService.Get(studyInstanceUID);
+                if (studyDatas == null || !studyDatas.Any())
+                    Thread.Sleep(1000);
                 retryTimes++;
             }
 
@@ -57,10 +66,16 @@ namespace ISoftViewerLibrary.Logics.QCOperation
                 ? GenerateQCGuid(studyInstanceUID)
                 : studyDatas.First().QCGuid;
 
-            if(!string.IsNullOrEmpty(desc)) OperationRecord.Description = desc;
+            if (!string.IsNullOrEmpty(desc)) OperationRecord.Description = desc;
             OperationRecord.QCGuid = guid;
             OperationRecord.Reason = reason;
             OperationRecord.Operator = user;
+        }
+
+        public void SetReasonAndDesc(string reason, string desc)
+        {
+            OperationRecord.Reason = reason;
+            OperationRecord.Description = desc;
         }
 
         private string GenerateQCGuid(string studyInstanceUID)
@@ -77,10 +92,10 @@ namespace ISoftViewerLibrary.Logics.QCOperation
             {
                 { new PairDatas { Name = "QCGuid", Value = guid } },
             };
-            
+
             DicomStudyService.GenerateNewTransaction();
             DicomStudyService.AddOrUpdate(tableField);
-            
+
             return guid;
         }
     }

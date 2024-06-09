@@ -90,10 +90,12 @@ namespace ISoftViewerQCSystem
                     Configuration.GetSection("FieldToTagMergeSplitTable").Get<List<FieldToDcmTagMap>>();
                 config.MergeSplitMappingTagTable = mergeSplitMappingTabSection;
 
-                var dcmSendService = Configuration.GetSection("TeramedServerDcmSendService");
-                dcmSendService.Bind(config);
+                // var dcmSendService = Configuration.GetSection("TeramedServerDcmSendService");
+                // dcmSendService.Bind(config);
 
                 config.VirtualFilePath = Configuration.GetSection("VirtualFilePath").Value;
+                
+                config.AnsiEncoding = Configuration.GetSection("AnsiEncoding").Value;
 
                 return config;
             });
@@ -134,8 +136,8 @@ namespace ISoftViewerQCSystem
             services.AddSingleton<AuthService>();
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
             services.AddSingleton<ConnectionMapping<string>>();
-
-
+            services.AddSingleton<SystemConfigService>();
+            
             services.AddScoped<PacsDBOperationService>();
             services.AddScoped<DicomTagService>();
             services.AddScoped<QCOperationContext>();
@@ -146,6 +148,7 @@ namespace ISoftViewerQCSystem
             services.AddScoped<ICommonRepositoryService<SvrDcmProviderDb>, DbTableService<SvrDcmProviderDb>>();
             services.AddScoped<ICommonRepositoryService<SvrDcmDestNode>, DbTableService<SvrDcmDestNode>>();
             services.AddScoped<ICommonRepositoryService<SvrConfiguration>, DbTableService<SvrConfiguration>>();
+            services.AddScoped<ICommonRepositoryService<SvrConfigurationsV2>, DbTableService<SvrConfigurationsV2>>();
             services.AddScoped<ICommonRepositoryService<SvrFileStorageDevice>, DbTableService<SvrFileStorageDevice>>();
             services.AddScoped<ICommonRepositoryService<SvrDcmTags>, DbTableService<SvrDcmTags>>();
             services.AddScoped<ICommonRepositoryService<SvrDcmTagFilters>, DbTableService<SvrDcmTagFilters>>();
@@ -172,7 +175,7 @@ namespace ISoftViewerQCSystem
             services.AddScoped<QCOperationRecordViewService>();
             services.AddScoped<StaticOptionsService>();
             services.AddScoped<QCAutoMappingConfigService>();
-
+            
             // services.AddAutoMapper(typeof(Startup));
             services.AddSingleton(provider => new MapperConfiguration(cfg =>
             {

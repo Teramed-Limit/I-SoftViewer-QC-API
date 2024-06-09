@@ -228,7 +228,7 @@
             Study QC應用層服務
             </summary>
         </member>
-        <member name="M:ISoftViewerQCSystem.Applications.StudyQcApplicationService.#ctor(Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Applications.StudyQcApplicationService},ISoftViewerLibrary.Services.DbQueriesService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Services.DbCommandService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Models.Interfaces.IDcmUnitOfWork,ISoftViewerLibrary.Models.Interfaces.IDcmCqusDatasets,ISoftViewerLibrary.Models.ValueObjects.EnvironmentConfiguration,ISoftViewerLibrary.Logics.QCOperation.QCOperationContext)">
+        <member name="M:ISoftViewerQCSystem.Applications.StudyQcApplicationService.#ctor(Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Applications.StudyQcApplicationService},ISoftViewerLibrary.Services.DbQueriesService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Services.DbCommandService{ISoftViewerLibrary.Models.DatabaseTables.CustomizeTable},ISoftViewerLibrary.Models.Interfaces.IDcmUnitOfWork,ISoftViewerLibrary.Models.Interfaces.IDcmCqusDatasets,ISoftViewerLibrary.Models.ValueObjects.EnvironmentConfiguration,ISoftViewerLibrary.Logics.QCOperation.QCOperationContext,ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrConfigurationsV2})">
             <summary>
             建構
             </summary>
@@ -239,6 +239,7 @@
             <param name="dcmCqusDatasts"></param>
             <param name="config"></param>
             <param name="qcOperationContext"></param>
+            <param name="pacsConfigDbServiceV2"></param>
         </member>
         <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.DbQryService">
             <summary>
@@ -278,6 +279,11 @@
         <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.QCOperationContext">
             <summary>
                 使用者QC操作記錄器
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Applications.StudyQcApplicationService.PacsConfigDbServiceV2">
+            <summary>
+             SystemConfiguration服務
             </summary>
         </member>
         <member name="M:ISoftViewerQCSystem.Applications.StudyQcApplicationService.Handle(System.String,System.Object)">
@@ -756,7 +762,7 @@
             更新StorageDevice
             </summary>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration},ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService,Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.SearchDcmServiceController})">
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration},ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService,ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrConfigurationsV2},Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.SearchDcmServiceController})">
             <summary>
             建構
             </summary>
@@ -790,6 +796,18 @@
             <returns></returns>
         </member>
         <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.GetPacsConfigeData">
+            <summary>
+            取得PACS SystemConfiguration
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.GetPacsConfigDataV2">
+            <summary>
+            取得PACS SystemConfiguration
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.UpdatePacsConfigDataV2(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrConfigurationsV2)">
             <summary>
             取得PACS SystemConfiguration
             </summary>
@@ -1004,7 +1022,13 @@
             </summary>
             <param name="value"></param>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Put(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.StudyMappingParameter)">
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Put(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.StudyMappingParameter{ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.DcmTagData})">
+            <summary>
+                病歷檢查資料與外部資料做資料批配校正
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.PutMulti(ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.StudyMappingParameter{System.Collections.Generic.List{ISoftViewerLibrary.Models.DTOs.DataCorrection.V1.DcmTagData}})">
             <summary>
                 病歷檢查資料與外部資料做資料批配校正
             </summary>

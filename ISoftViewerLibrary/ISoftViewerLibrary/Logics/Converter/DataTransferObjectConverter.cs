@@ -516,6 +516,8 @@ namespace ISoftViewerLibrary.Logic.Converter
             {
                 if (elementVal.Trim() == "ISO_IR 192" || elementVal.Trim() == "ISO_IR_192")
                     IsUtf8Encoding = true;
+                else
+                    IsUtf8Encoding = false;
             }
 
             List<DataCorrection.V1.DcmTagData> dcmTagDatas = new();
@@ -538,6 +540,12 @@ namespace ISoftViewerLibrary.Logic.Converter
         /// <returns>填充的 DICOM 標籤資料列表</returns>
         public List<DataCorrection.V1.DcmTagData> PopulateFromDataset(DicomDataset dataset)
         {
+            if (dataset.TryGetString(DicomTag.SpecificCharacterSet, out string elementVal) == true)
+            {
+                if (elementVal.Trim() == "ISO_IR 192" || elementVal.Trim() == "ISO_IR_192")
+                    IsUtf8Encoding = true;
+            }
+
             var dcmTagDatas = new List<DataCorrection.V1.DcmTagData>();
 
             // 遞迴填充資料
@@ -551,18 +559,21 @@ namespace ISoftViewerLibrary.Logic.Converter
                 DataCorrection.V1.DcmTagData tagData = null;
                 if (dcmHelper.GetDicomValueToStringFromDicomItem(dcmItem, dVR, ref value, IsUtf8Encoding))
                     tagData = MakeDcmTagData(dTag, value);
-                
+
                 // 如果有子資料集，遞迴處理
                 if (dcmItem.ValueRepresentation == DicomVR.SQ)
                 {
                     if (dcmItem is not DicomSequence dSequence)
                         continue;
-                    
+
                     foreach (var subDataset in dSequence)
                     {
                         var subTagData = new DataCorrection.V1.DcmTagData();
                         subTagData.SeqDcmTagData = PopulateFromDataset(subDataset);
-                        tagData.SeqDcmTagData = subTagData.SeqDcmTagData;
+                        if (tagData.SeqDcmTagData.Any())
+                            tagData.SeqDcmTagData.AddRange(subTagData.SeqDcmTagData);
+                        else
+                            tagData.SeqDcmTagData = subTagData.SeqDcmTagData;
                     }
                 }
 

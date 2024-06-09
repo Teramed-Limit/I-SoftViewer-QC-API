@@ -37,8 +37,7 @@ namespace ISoftViewerQCSystem.Controllers
                     EnvSetup = JsonSerializer.Deserialize<EnvSetup>(x.EnvSetup, new JsonSerializerOptions()),
                     WkSCP = JsonSerializer.Deserialize<DicomNode>(x.WkSCP, new JsonSerializerOptions()),
                     StoreSCP = JsonSerializer.Deserialize<List<DicomNode>>(x.StoreSCP, new JsonSerializerOptions()),
-                    CFindReqField =
-                        JsonSerializer.Deserialize<ElementList>(x.CFindReqField, new JsonSerializerOptions()),
+                    CFindReqField = JsonSerializer.Deserialize<ElementList>(x.CFindReqField, new JsonSerializerOptions()),
                     MappingField = JsonSerializer.Deserialize<ElementList>(x.MappingField, new JsonSerializerOptions())
                 });
 

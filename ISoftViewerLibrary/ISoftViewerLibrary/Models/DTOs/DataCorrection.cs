@@ -129,7 +129,7 @@ namespace ISoftViewerLibrary.Models.DTOs
             /// <summary>
             /// QC Mapping的參數
             /// </summary>
-            public class StudyMappingParameter
+            public class StudyMappingParameter<T>
             {
                 /// <summary>
                 /// 條改使用者帳號
@@ -138,7 +138,7 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// <summary>
                 /// 前端的Dataset Tag列表
                 /// </summary>
-                public List<DcmTagData> Dataset { get; set; } = new List<DcmTagData>();
+                public List<T> Dataset { get; set; } = new();
                 /// <summary>
                 /// 要Mapping的病歷號碼
                 /// </summary>
@@ -147,8 +147,13 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// 要Mapping的檢查唯一碼
                 /// </summary>
                 public string StudyInstanceUID { get; set; } = "";
+                /// <summary>
+                /// 目標的WorkList名稱，為了取得Mapping Rules
+                /// </summary>
+                public string TargetWorklistName { get; set; } = "";
             }
             #endregion
+            
 
             #region StudyUnmappingParameter
             /// <summary>
@@ -209,6 +214,10 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// DICOM Tag Keyword
                 /// </summary>
                 public string Keyword { get; set; }
+                /// <summary>
+                /// Rules
+                /// </summary>
+                public string MappingRules { get; set; }
 
                 /// <summary>
                 /// Sub Dcm TagData

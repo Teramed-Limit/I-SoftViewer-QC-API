@@ -462,6 +462,7 @@ namespace ISoftViewerLibrary.Models.DTOs
                 public QueryResult()
                 {
                     Datasets = new List<List<DcmTagData>>();
+                    FlatDatasets = new List<List<DcmTagData>>();
                     FileSetIDs = new List<DcmTagData>();
                 }
 
@@ -471,6 +472,11 @@ namespace ISoftViewerLibrary.Models.DTOs
                 ///     資料集合
                 /// </summary>
                 public List<List<DcmTagData>> Datasets { get; set; }
+                
+                /// <summary>
+                ///     資料集合
+                /// </summary>
+                public List<List<DcmTagData>> FlatDatasets { get; set; }
 
                 /// <summary>
                 ///     檔案集合 File-Set IDs(0004,1130)

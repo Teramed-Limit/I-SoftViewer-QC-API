@@ -48,22 +48,26 @@ namespace ISoftViewerLibrary.Models.ValueObjects
         /// Merge/Split Mapping tag table
         /// </summary>
         public List<FieldToDcmTagMap> MergeSplitMappingTagTable { get; set; } = new ();
+        // /// <summary>
+        // /// Local AE Title
+        // /// </summary>
+        // public string CallingAeTitle { get; set; } = "";
+        // /// <summary>
+        // /// Server AE Title
+        // /// </summary>
+        // public string CalledAeTitle { get; set; } = "";
+        // /// <summary>
+        // /// IP
+        // /// </summary>
+        // public string DcmSendIP { get; set; } = "";
+        // /// <summary>
+        // /// 連接埠
+        // /// </summary>
+        // public int DcmSendPort { get; set; } = 0;
         /// <summary>
-        /// Local AE Title
+        /// Ansi Encoding
         /// </summary>
-        public string CallingAeTitle { get; set; } = "";
-        /// <summary>
-        /// Server AE Title
-        /// </summary>
-        public string CalledAeTitle { get; set; } = "";
-        /// <summary>
-        /// IP
-        /// </summary>
-        public string DcmSendIP { get; set; } = "";
-        /// <summary>
-        /// 連接埠
-        /// </summary>
-        public int DcmSendPort { get; set; } = 0;
+        public string AnsiEncoding { get; set; } = "big5";
         #endregion
     }
     #endregion

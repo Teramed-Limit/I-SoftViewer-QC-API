@@ -61,7 +61,7 @@ namespace ISoftViewerQCSystem.Applications
                 switch (command)
                 {
                     case Queries.V1.FindWorklistKeys cmd:
-                        Serilog.Log.Information(
+                        Serilog.Log.Debug(
                             "====================== Handle the FindWorklistKeys service start ======================");
                         node = DicomOperationNodeService.GetOperationNode("Worklist", cmd.QueryName);
                         dcmIOD = new QueryDicomIODs();
@@ -101,11 +101,11 @@ namespace ISoftViewerQCSystem.Applications
                             node.IPAddress, node.Port, node.AETitle, node.RemoteAETitle, parameter);
                         // if(jsonDatasets.Datasets.Count <= 0)
                         //     throw new Exception(DicomQryService.Message);
-                        Serilog.Log.Information(
+                        Serilog.Log.Debug(
                             "====================== Handle the FindWorklistKeys service end  ======================");
                         break;
                     case Queries.V1.FindQRKeys cmd:
-                        Serilog.Log.Information(
+                        Serilog.Log.Debug(
                             "====================== Handle the FindQRKeys service start ======================");
                         node = DicomOperationNodeService.GetOperationNode("Query-Retrieve", cmd.QueryName);
                         dcmIOD = new QueryDicomIODs();

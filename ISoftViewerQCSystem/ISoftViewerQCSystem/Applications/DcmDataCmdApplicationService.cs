@@ -59,7 +59,7 @@ namespace ISoftViewerQCSystem.Applications
                         // 最後一個永遠是設定檔的PACS Server
                         var nodesList = cmd.SendOtherEnableNodes
                             ? _dicomOperationNodeService.GetAllCStoreNode()
-                            : new List<DicomOperationNodes> { _dicomOperationNodeService.GetTeramedCStoreNode() };
+                            : new List<DicomOperationNodes> { _dicomOperationNodeService.GetLocalCStoreNode() };
 
                         tmpResult = DicomCmdService.Update(dcmIOD, Types.DcmServiceUserType.dsutStore, nodesList);
 
@@ -79,7 +79,7 @@ namespace ISoftViewerQCSystem.Applications
                             // 指派使用者操作
                             if (cmd.SendOtherEnableNodes)
                             {
-                                if (_dicomOperationNodeService.IsTeramedCStoreNode(node))
+                                if (_dicomOperationNodeService.IsLocalCStoreNode(node))
                                 {
                                     QCOperationContext.SetLogger(new ImportStudyLogger());
                                     QCOperationContext.SetParams(userName, studyData.StudyInstanceUID, "", null);

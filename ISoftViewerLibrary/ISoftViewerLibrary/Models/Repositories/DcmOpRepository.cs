@@ -7,6 +7,7 @@ using ISoftViewerLibrary.Models.ValueObjects;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -248,7 +249,21 @@ namespace ISoftViewerLibrary.Models.Repositories
                 // Worklist Returnkeys
                 if (parameter.ContainsKey("worklistReturnkeys"))
                 {
-                    DicomCFindRequest cfindRq = DicomCFindRequest.CreateWorklistQuery();
+                    DicomDateRange dateRange = new();
+                    DateTime startDateTime = DateTime
+                        .ParseExact(study_date.Split("-")[0], "yyyyMMdd", CultureInfo.InvariantCulture).ToLocalTime();
+                    DateTime endDateTime = DateTime
+                        .ParseExact(study_date.Split("-")[1], "yyyyMMdd", CultureInfo.InvariantCulture).ToLocalTime();
+                    dateRange.Minimum = startDateTime;
+                    dateRange.Maximum = endDateTime;
+                    DicomCFindRequest cfindRq = DicomCFindRequest.CreateWorklistQuery(
+                        patient_id,
+                        patient_name,
+                        null,
+                        null,
+                        modality,
+                        dateRange);
+
                     WorklistReturnkeys returnKeys = parameter["worklistReturnkeys"] as WorklistReturnkeys;
                     var replaceParams = new Dictionary<string, string>
                     {
@@ -263,7 +278,11 @@ namespace ISoftViewerLibrary.Models.Repositories
                         { $"{{{DicomTag.RequestedProcedureID.DictionaryEntry.Keyword.ToLower()}}}", procedure_id }
                     };
                     if (returnKeys != null)
-                        UpdateDatasetFromWorklist(cfindRq.Dataset, returnKeys, replaceParams);
+                    {
+                        DicomOperatorHelper dcmHelper = new();
+                        CreateCFindWorklist(dcmHelper, cfindRq.Dataset, returnKeys, replaceParams);
+                    }
+
                     DicomDatasets.Add(cfindRq.Dataset);
                 }
                 // Worklist default dataset
@@ -302,7 +321,6 @@ namespace ISoftViewerLibrary.Models.Repositories
                         { DicomTag.RequestedProcedurePriority, String.Empty },
                         new DicomSequence(DicomTag.RequestedProcedureCodeSequence),
                         new DicomSequence(DicomTag.ReferencedStudySequence),
-
                         new DicomSequence(DicomTag.ProcedureCodeSequence)
                     };
 
@@ -455,79 +473,72 @@ namespace ISoftViewerLibrary.Models.Repositories
             return dcmDataset;
         }
 
-        protected void UpdateDatasetFromWorklist(DicomDataset dataset, WorklistReturnkeys worklistReturnkeys,
+        protected void CreateCFindWorklist(
+            DicomOperatorHelper dcmHelper,
+            DicomDataset dataset,
+            WorklistReturnkeys worklistReturnkeys,
             Dictionary<string, string> parameters)
         {
+            // 查詢是用什麼SpecificCharacterSet，預設都用UTF-8
+            var characterSet = worklistReturnkeys.ReturnKeys.Find(x => x.DicomTag == "0008,0005");
+            var isUtf8 = true;
+            isUtf8 = characterSet is not { Value: "ISO_IR 100" };
+
             // 處理ReturnKey元素
             foreach (var returnKey in worklistReturnkeys.ReturnKeys)
             {
                 if (!string.IsNullOrEmpty(returnKey.DicomTag))
                 {
                     DicomTag tag = DicomTag.Parse(returnKey.DicomTag);
-                    dataset.AddOrUpdate(tag,
+                    dcmHelper.WriteDicomValueInDataset(dataset, tag,
                         parameters.TryGetValue(returnKey.Value.ToLower(), out var parameter)
                             ? parameter
-                            : returnKey.Value);
-                    
-                    // if (returnKey.Value == "{patientName}")
-                    // {
-                    //     Encoding utf8 = Encoding.Unicode;
-                    //     dataset.AddOrUpdate(tag, utf8.GetString(utf8.GetBytes("中文字")));
-                    //     // dataset.AddOrUpdate(tag, "幹");
-                    // }
-                    // else
-                    // {
-                    //     dataset.AddOrUpdate(tag,
-                    //         parameters.TryGetValue(returnKey.Value.ToLower(), out var parameter)
-                    //             ? parameter
-                    //             : returnKey.Value);
-                    // }
+                            : returnKey.Value, isUtf8);
                 }
             }
 
             // 處理ReturnKeySQ元素
             foreach (var returnKeySQ in worklistReturnkeys.ReturnKeySQs)
             {
-                DicomDataset subDataset = new DicomDataset();
-
-                foreach (var subReturnKey in returnKeySQ.ReturnKeys)
-                {
-                    if (!string.IsNullOrEmpty(subReturnKey.DicomTag))
-                    {
-                        DicomTag tag = DicomTag.Parse(subReturnKey.DicomTag);
-                        // subDataset.AddOrUpdate(tag, subReturnKey.Value);
-                        subDataset.AddOrUpdate(tag,
-                            parameters.TryGetValue(subReturnKey.Value.ToLower(), out var parameter)
-                                ? parameter
-                                : subReturnKey.Value);
-                    }
-                }
-
-                // 處理ReturnKeySubSQ元素
-                foreach (var returnKeySubSQ in returnKeySQ.ReturnKeySubSQs)
-                {
-                    DicomDataset subSubDataset = new DicomDataset();
-
-                    foreach (var subSubReturnKey in returnKeySubSQ.ReturnKeys)
-                    {
-                        if (!string.IsNullOrEmpty(subSubReturnKey.DicomTag))
-                        {
-                            DicomTag tag = DicomTag.Parse(subSubReturnKey.DicomTag);
-                            // subSubDataset.AddOrUpdate(tag, subSubReturnKey.Value);
-                            subSubDataset.AddOrUpdate(tag,
-                                parameters.TryGetValue(subSubReturnKey.Value.ToLower(), out var parameter)
-                                    ? parameter
-                                    : subSubReturnKey.Value);
-                        }
-                    }
-
-                    DicomTag subSequenceTag = DicomTag.Parse(returnKeySubSQ.DicomTag);
-                    subDataset.AddOrUpdate(new DicomSequence(subSequenceTag, subSubDataset));
-                }
-
-                DicomTag sequenceTag = DicomTag.Parse(returnKeySQ.DicomTag);
-                dataset.AddOrUpdate(new DicomSequence(sequenceTag, subDataset));
+                AddSequenceToDataset(returnKeySQ, dataset, dcmHelper, parameters, isUtf8);
             }
+        }
+
+        private void AddSequenceToDataset(
+            ReturnKeySQ returnKeySQ,
+            DicomDataset dataset,
+            DicomOperatorHelper dcmHelper,
+            Dictionary<string, string> parameters,
+            bool isUtf8)
+        {
+            // 建立Sequence
+            DicomTag sequenceTag = DicomTag.Parse(returnKeySQ.DicomTag);
+            DicomSequence dicomSequence = new DicomSequence(sequenceTag);
+
+            // 建立一個新的 DicomDataset 作為序列項目
+            var sequenceItem = new DicomDataset();
+
+            // 處理 ReturnKey
+            foreach (var returnKey in returnKeySQ.ReturnKeys)
+            {
+                DicomTag tag = DicomTag.Parse(returnKey.DicomTag);
+                dcmHelper.WriteDicomValueInDataset(sequenceItem, tag,
+                    parameters.TryGetValue(returnKey.Value.ToLower(), out var parameter)
+                        ? parameter
+                        : returnKey.Value, isUtf8);
+            }
+
+            // 處理嵌套的 ReturnKeySQ
+            foreach (var nestedReturnKeySQ in returnKeySQ.ReturnKeySQs)
+            {
+                AddSequenceToDataset(nestedReturnKeySQ, sequenceItem, dcmHelper, parameters, isUtf8);
+            }
+
+            // 將處理完的序列項目加入到序列中
+            dicomSequence.Items.Add(sequenceItem);
+
+            // 將序列加入到原始的 DicomDataset 中
+            dataset.AddOrUpdate(dicomSequence);
         }
 
         #endregion
