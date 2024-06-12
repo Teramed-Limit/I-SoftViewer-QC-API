@@ -121,8 +121,8 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
     /// <returns></returns>
     protected override async Task UpdateDicomTableToDatabase()
     {
-        if (NeedUpdatePatientTable == true)
-            DcmPatientUidTable.UpdatePatientId(NewPatientID, Data.ModifyUser);
+        // if (NeedUpdatePatientTable == true)
+        //     DcmPatientUidTable.UpdatePatientId(NewPatientID, Data.ModifyUser);
 
         string originalUid = TobeDcmStudyUidTable.StudyInstanceUID.Value.Trim();
         TobeDcmStudyUidTable
@@ -166,9 +166,9 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
 
             if (generateNewUid)
             {
-                // dcmFileDataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
-                // dcmFileDataset.AddOrUpdate(DicomTag.SeriesInstanceUID, DicomUIDGenerator.GenerateDerivedFromUUID());
-                // dcmFileDataset.AddOrUpdate(DicomTag.SOPInstanceUID, DicomUIDGenerator.GenerateDerivedFromUUID());
+                dcmFileDataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
+                dcmFileDataset.AddOrUpdate(DicomTag.SeriesInstanceUID, DicomUIDGenerator.GenerateDerivedFromUUID());
+                dcmFileDataset.AddOrUpdate(DicomTag.SOPInstanceUID, DicomUIDGenerator.GenerateDerivedFromUUID());
             }
         }
         catch (Exception ex)

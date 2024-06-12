@@ -7,6 +7,7 @@ namespace ISoftViewerLibrary.Logics.Interface
     /// </summary>
     public interface IQCOperationLoggerStrategy
     {
+        string QCGuid { get; }
         void InjectService(OperationRecordService operationRecordService, DicomStudyService dicomStudyService);
         bool WriteSuccessRecord();
         bool WriteFailedRecord();

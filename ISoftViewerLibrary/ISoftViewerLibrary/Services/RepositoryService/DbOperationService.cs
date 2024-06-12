@@ -184,8 +184,9 @@ namespace ISoftViewerLibrary.Services.RepositoryService
                 if (commit)
                     DbTransactionUnitOfWork.Commit();
             }
-            catch (System.Exception)
+            catch (Exception exception)
             {
+                Serilog.Log.Error(exception, "Delete data failed");
                 return false;
             }
             return true;

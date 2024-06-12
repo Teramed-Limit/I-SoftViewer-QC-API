@@ -603,6 +603,21 @@ namespace ISoftViewerLibrary.Models.DatabaseTables
             return this;
         }
         /// <summary>
+        /// 更新Instance UID和路徑資料
+        /// </summary>
+        /// <param name="seUid"></param>
+        /// <param name="updateSopUid"></param>
+        /// <returns></returns>
+        public DicomImageUniqueIdentifiersTable UpdateInstanceUID(string seUid, string updateSopUid)
+        {
+            Apply(new CommandFieldEvent.OnImageUidUpdated() 
+            {
+                SeriesInstanceUID = seUid,
+                UpdateSOPInstanceUID = updateSopUid,
+            });
+            return this;
+        }
+        /// <summary>
         /// 更新,把原始資保留下來
         /// </summary>
         /// <param name="data"></param>
@@ -681,6 +696,10 @@ namespace ISoftViewerLibrary.Models.DatabaseTables
                     FilePath.UpdateDbFieldValues(e.FilePath, "", null);
                     ModifiedUser.UpdateDbFieldValues(e.ModifiedUser, "", null);
                     EventState = ImageUidTableState.imUpdateUidAndPath;
+                    break;
+                case CommandFieldEvent.OnImageUidUpdated e:
+                    SeriesInstanceUID.UpdateDbFieldValues(e.SeriesInstanceUID, "", null);
+                    UpdateSOPInstanceUID.UpdateDbFieldValues(e.UpdateSOPInstanceUID, "", null);
                     break;
                 case CommandFieldEvent.OnImageUnmappedDcmTagUpdated e:
                     UnmappedDcmTag.UpdateDbFieldValues(e.UnmappedDcmTags, "", null);

@@ -50,7 +50,7 @@ namespace ISoftViewerLibrary.Services
             try
             {
                 Serilog.Log.Information("Start mapping study data and image");
-                
+
                 //確定即將要被配對的Study
                 if (await DoseStudyExist(Data.Dataset))
                     throw new Exception("Study Instance UID duplicated.");
@@ -58,7 +58,10 @@ namespace ISoftViewerLibrary.Services
                 //取得要做Mapping的檢查,系列及影像，之後要去更新資料庫用
                 if (await QueryUidTable(Data.ModifyUser, Data.StudyInstanceUID, true) == false)
                     throw new Exception("Failed to query to mapping table or storage device data!!");
-                
+
+                if (await CEchoSCP() == false)
+                    throw new Exception("Failed to connect to PACS server!!");
+
                 //Mapping資料
                 AssignPidNdStudyUid(Data.Dataset);
 
@@ -103,10 +106,14 @@ namespace ISoftViewerLibrary.Services
                         //Mapping資料,只要有檔案不需要調整,則不繼續處理
                         if ((haveProcessed &= MappingDatasetToDcmFile(Data.Dataset, dcmFile, dcmHelper)) == false)
                             break;
-                        
-                        dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID, _seTable.UpdateSeriesInstanceUID.Value.Trim());
-                        dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID, _imgTable.UpdateSOPInstanceUID.Value.Trim());
-                        
+
+                        // 更新Instance UID
+                        dcmFile.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
+                        dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID,
+                            _seTable.UpdateSeriesInstanceUID.Value.Trim());
+                        dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID,
+                            _imgTable.UpdateSOPInstanceUID.Value.Trim());
+
                         modifiedDcmFile.Add(dcmFilePath, dcmFile);
                         _imgTable.UpdateKeyValueSwap();
                     }
@@ -140,6 +147,7 @@ namespace ISoftViewerLibrary.Services
                 Result = OpResult.OpFailure;
                 // OperationContext.WriteFailedRecord(ex.Message, ex.StackTrace);
                 Serilog.Log.Error(ex, "Mapping study data and image failed");
+                PrintLog();
                 throw new Exception(Message);
             }
 

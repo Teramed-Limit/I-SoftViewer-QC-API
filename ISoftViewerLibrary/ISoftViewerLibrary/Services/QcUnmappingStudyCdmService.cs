@@ -102,6 +102,8 @@ namespace ISoftViewerLibrary.Services
                 bool haveProcessed = false;
 
 
+                string newSeriesUID = "";
+                string newSopInstanceUID = "";
                 for (int seIdx = 0; seIdx < TobeDcmStudyUidTable.DetailElements.Count; seIdx++)
                 {
                     // var unmappedIndexList = new List<int>();
@@ -125,7 +127,7 @@ namespace ISoftViewerLibrary.Services
                         {
                             continue;
                         }
-
+                        
                         List<DataCorrection.V1.DcmTagData> dcmTagDatas;
                         dcmTagDatas =
                             JsonSerializer.Deserialize<List<DataCorrection.V1.DcmTagData>>(_imgTable.UnmappedDcmTag
@@ -160,7 +162,13 @@ namespace ISoftViewerLibrary.Services
                         //Unmapping資料
                         UnmappingDatasetToDcmFile(dcmTagDatas, dcmFile, dcmHelper);
                         modifiedDcmFile.Add(dcmFilePath, dcmFile);
+                        
+                        // 更新Instance UID
+                        newSeriesUID = dcmFile.Dataset.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
+                        newSopInstanceUID = dcmFile.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
+                        
                         //清除Mapping記錄欄位
+                        _imgTable.UpdateInstanceUID(newSeriesUID, newSopInstanceUID);
                         _imgTable.UpdateUnmappedDcmTag("");
                         _imgTable.UpdateKeyValueSwap();
                         haveProcessed = true;
@@ -168,9 +176,7 @@ namespace ISoftViewerLibrary.Services
 
                     if (haveProcessed == true)
                     {
-                        string seriesUID = _seTable.SeriesInstanceUID.Value;
-                        _seTable.UpdateInstanceUIDAndData(updateUID: seriesUID, studyUID: OriginalStudyInstanceUID,
-                            Data.ModifyUser);
+                        _seTable.UpdateInstanceUIDAndData(updateUID: newSeriesUID, studyUID: OriginalStudyInstanceUID, Data.ModifyUser);
                         _seTable.UpdateKeyValueSwap();
                     }
                 }

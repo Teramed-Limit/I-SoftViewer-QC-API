@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CharLS;
 using Dicom;
 using ISoftViewerLibrary.Model.DicomOperator;
 using ISoftViewerLibrary.Models.DatabaseTables;
@@ -39,7 +40,11 @@ namespace ISoftViewerLibrary.Services
             {
                 Serilog.Log.Information("Start multi mapping study data and image");
 
+                if (await CEchoSCP() == false)
+                    throw new Exception("Failed to connect to PACS server!!");
+
                 var index = 0;
+                var referenceStudyInstanceUID = "";
                 foreach (var dataset in Data.Dataset)
                 {
                     // 先確定即將要被配對的Study是否已經存在
@@ -79,7 +84,8 @@ namespace ISoftViewerLibrary.Services
 
                         //Series Table關聯要先處理
                         string seriesUID = _seTable.SeriesInstanceUID.Value.Trim();
-                        _seTable.UpdateInstanceUIDAndData(seriesUID, NewStudyInstanceUID, Data.ModifyUser);
+                        string newSeriesUID = _seTable.UpdateSeriesInstanceUID.Value.Trim();
+                        _seTable.UpdateInstanceUIDAndData(newSeriesUID, NewStudyInstanceUID, Data.ModifyUser);
                         _seTable.UpdateKeyValueSwap();
                         //Mapping不會動到Image層的資料,所以資料庫不需要更新任何資料
                         for (int imIdx = 0; imIdx < _seTable.DetailElements.Count; imIdx++)
@@ -94,10 +100,24 @@ namespace ISoftViewerLibrary.Services
 
                             string dcmFilePath = string.Empty;
                             DicomFile dcmFile = GetDicomFile(_imgTable, dcmHelper, ref dcmFilePath);
-                            //Mapping資料,只要有檔案不需要調整,則不繼續處理
+
+                            //Mapping資料,只要有檔案不需要調整,則不繼續處理，第二個需要處理Instance UID
                             if ((haveProcessed &= MappingDatasetToDcmFile(dataset, dcmFile, dcmHelper, index > 0)) ==
                                 false)
                                 break;
+
+                            // 更新Instance UID
+                            if (index == 0)
+                            {
+                                dcmFile.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
+                                dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID,
+                                    _seTable.UpdateSeriesInstanceUID.Value.Trim());
+                                dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID,
+                                    _imgTable.UpdateSOPInstanceUID.Value.Trim());
+                                referenceStudyInstanceUID =
+                                    dcmFile.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+                            }
+
                             modifiedDcmFile.Add(dcmFilePath, dcmFile);
                             _imgTable.UpdateKeyValueSwap();
                         }
@@ -128,7 +148,8 @@ namespace ISoftViewerLibrary.Services
                         //更新狀態
                         await MakeSureStudyExist(NewStudyInstanceUID);
                         await UpdateStudyMaintainStatusToDatabase(NewStudyInstanceUID);
-                        OperationContext.SetParams(Data.ModifyUser, NewStudyInstanceUID, "", "");
+                        OperationContext.SetParams(Data.ModifyUser, NewStudyInstanceUID, "",
+                            $"Reference from {referenceStudyInstanceUID}");
                         OperationContext.WriteSuccessRecord();
                     }
 

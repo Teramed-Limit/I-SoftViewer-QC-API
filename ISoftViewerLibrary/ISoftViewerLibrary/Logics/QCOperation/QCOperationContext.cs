@@ -25,6 +25,11 @@ namespace ISoftViewerLibrary.Logics.QCOperation
         {
             _strategy.SetParams(user, studyInstanceUID, reason, desc);
         }
+        
+        public string GetQCGuid()
+        {
+            return _strategy.QCGuid;
+        }
 
         public void WriteSuccessRecord()
         {

@@ -514,14 +514,22 @@ namespace ISoftViewerLibrary.Services
             bool conditionMet = false;
 
             // Continue looping until the condition is met
+            var retryCount = 0;
             while (!conditionMet)
             {
+                if (retryCount > 10)
+                    throw new Exception("     Query study table failed !!" + studyUID);
+
                 // Perform the async operation and get the result
                 var dataset = await QueryStudyTable(studyUID);
                 conditionMet = dataset.DBDatasets.Count > 0;
 
                 // Optional: Add a delay to avoid a tight loop
-                if (conditionMet == false) await Task.Delay(1000);
+                if (conditionMet == false)
+                {
+                    await Task.Delay(1000);
+                    retryCount++;
+                }
             }
         }
 
@@ -877,9 +885,6 @@ namespace ISoftViewerLibrary.Services
                     //Modify 20220524 Oscar 改用clone的方式避開資料檢核(AutoValidate屬性)
                     DicomDataset dataset = dcmFile.Dataset.Clone();
 
-                    Console.WriteLine(dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID));
-                    Console.WriteLine(dataset.GetSingleValue<string>(DicomTag.SeriesInstanceUID));
-                    Console.WriteLine(dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID));
                     DcmCqusDatasets.DicomDatasets.Add(dataset);
                     dcmFile = null;
                 }
@@ -902,6 +907,37 @@ namespace ISoftViewerLibrary.Services
             {
                 Message = ex.Message;
                 Result = OpResult.OpFailure;
+            }
+
+            return await Task.FromResult(result);
+        }
+        
+        /// <summary>
+        /// 傳送DICOM檔案到遠端DICOM Service Provider
+        /// </summary>
+        /// <returns></returns>
+        protected async Task<bool> CEchoSCP()
+        {
+            bool result = false;
+            try
+            {
+                DcmUnitOfWork.Begin(
+                    LocalCStoreNode.IPAddress,
+                    LocalCStoreNode.Port,
+                    LocalCStoreNode.AETitle,
+                    LocalCStoreNode.RemoteAETitle,
+                    Types.DcmServiceUserType.dsutEcho);
+                DcmUnitOfWork.RegisterRepository(DcmCqusDatasets);
+
+                if (await DcmUnitOfWork.Commit() == false)
+                    throw new Exception(DcmUnitOfWork.Message);
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                Message = ex.Message;
+                Result = OpResult.OpFailure;
+                throw;
             }
 
             return await Task.FromResult(result);

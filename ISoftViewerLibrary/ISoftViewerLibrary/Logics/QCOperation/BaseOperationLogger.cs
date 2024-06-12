@@ -19,6 +19,7 @@ namespace ISoftViewerLibrary.Logics.QCOperation
         protected OperationRecord OperationRecord;
         protected OperationRecordService OperationRecordService;
         protected IEnumerable<DicomStudyData> studyDatas = null;
+        public string QCGuid { get; private set; }
 
         public void InjectService(OperationRecordService operationRecordService, DicomStudyService dicomStudyService)
         {
@@ -62,12 +63,12 @@ namespace ISoftViewerLibrary.Logics.QCOperation
                 retryTimes++;
             }
 
-            var guid = string.IsNullOrEmpty(studyDatas.First().QCGuid)
+            QCGuid = string.IsNullOrEmpty(studyDatas.First().QCGuid)
                 ? GenerateQCGuid(studyInstanceUID)
                 : studyDatas.First().QCGuid;
 
             if (!string.IsNullOrEmpty(desc)) OperationRecord.Description = desc;
-            OperationRecord.QCGuid = guid;
+            OperationRecord.QCGuid = QCGuid;
             OperationRecord.Reason = reason;
             OperationRecord.Operator = user;
         }

@@ -4,8 +4,12 @@ using ISoftViewerLibrary.Models.Interfaces;
 using ISoftViewerLibrary.Models.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.ServiceProcess;
+using ISoftViewerLibrary.Models.DTOs.PacsServer;
+using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
+using ISoftViewerQCSystem.Services;
 using Microsoft.Extensions.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,16 +23,20 @@ namespace ISoftViewerQCSystem.Controllers
     [ApiController]
     public class ConfigurationController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly DicomOperationNodeService _dicomOperationNodeService;
         private readonly DicomDestinationNodeService _dicomDestinationNodeService;
-        private readonly IConfiguration _configuration;
+        private readonly ICommonRepositoryService<SvrDcmNodeDb> _dicomNodeService;
 
         public ConfigurationController(
+            IConfiguration configuration,
             DicomOperationNodeService dicomOperationNodeService,
-            IConfiguration configuration, DicomDestinationNodeService dicomDestinationNodeService)
+            DicomDestinationNodeService dicomDestinationNodeService,
+            ICommonRepositoryService<SvrDcmNodeDb> dicomNodeService)
         {
             _dicomOperationNodeService = dicomOperationNodeService;
             _dicomDestinationNodeService = dicomDestinationNodeService;
+            _dicomNodeService = (DbTableService<SvrDcmNodeDb>)dicomNodeService;
             _configuration = configuration;
         }
 
@@ -42,7 +50,7 @@ namespace ISoftViewerQCSystem.Controllers
         {
             return Ok(_dicomOperationNodeService.GetAll());
         }
-
+        
         /// <summary>
         ///     根據Type取得Enable的DicomNode
         /// </summary>
@@ -105,7 +113,7 @@ namespace ISoftViewerQCSystem.Controllers
         {
             return Ok(_dicomDestinationNodeService.GetAll());
         }
-        
+
         /// <summary>
         ///     增加DicomDestinationNodes
         /// </summary>
@@ -134,10 +142,30 @@ namespace ISoftViewerQCSystem.Controllers
         [HttpDelete("dicomDestinationNode/{name}")]
         public ActionResult DeleteDicomDesNodeConfig(string name)
         {
+            var nodeListName = CheckRoutingDestination(name);
+            if (nodeListName != null)
+                return BadRequest($"Routing destination {name} is used by {nodeListName}, please remove it first");
+            
+            _dicomDestinationNodeService.GenerateNewTransaction();
             if (!_dicomDestinationNodeService.Delete(name))
-                return BadRequest();
+                return BadRequest("Delete failed");
 
             return Ok();
+        }
+
+        private string CheckRoutingDestination(string name)
+        {
+            _dicomNodeService.GenerateNewTransaction();
+            var nodeList = _dicomNodeService
+                .GetAll()
+                .Where(x => x.AuotRoutingDestination.Contains(name))
+                .ToList();
+
+            if (nodeList.Count == 0)
+                return null;
+
+            var nodeName = nodeList.Select(x => x.Name).ToList();
+            return string.Join(",", nodeName);
         }
 
         #endregion

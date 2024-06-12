@@ -308,6 +308,18 @@ namespace ISoftViewerLibrary.Models.Events
             /// </summary>
             public string ModifiedUser { get; set;}
         }
+        
+        public class OnImageUidUpdated
+        {
+            /// <summary>
+            /// 更改後SeriesInstanceUID
+            /// </summary>
+            public string SeriesInstanceUID { get; set; }
+            /// <summary>
+            /// Where條件的SOPInstanceUID
+            /// </summary>
+            public string UpdateSOPInstanceUID { get; set; }
+        }
 
         public class OnImageFilePathUpdated
         {
