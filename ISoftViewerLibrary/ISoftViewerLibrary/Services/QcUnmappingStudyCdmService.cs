@@ -119,8 +119,8 @@ namespace ISoftViewerLibrary.Services
                             throw new Exception("Illegal image table");
 
                         //被合併過且有Mapping的Study必須先解除合併
-                        if (beenMerged)
-                            throw new Exception("Please split study first");
+                        // if (beenMerged)
+                        //     throw new Exception("Please split study first");
 
                         //欄位沒有值,則不需要處理
                         if (_imgTable.UnmappedDcmTag.Value == string.Empty)

@@ -748,10 +748,11 @@ namespace ISoftViewerLibrary.Models.DatabaseTables
             DBPrimaryKeyFields.Clear();
             DBNormalFields.Clear();
 
-            DBPrimaryKeyFields.Add(SOPInstanceUID);
-
             DBNormalFields.Add(SeriesInstanceUID);
+            
+            DBPrimaryKeyFields.Add(SOPInstanceUID);
             DBNormalFields.Add(UpdateSOPInstanceUID);
+            
             DBNormalFields.Add(ReferencedSOPInstanceUID);
             DBNormalFields.Add(ReferencedSeriesInstanceUID);
             DBNormalFields.Add(StorageDeviceID);

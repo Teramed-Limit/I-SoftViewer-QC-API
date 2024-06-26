@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ISoftViewerLibrary.Logics.QCOperation;
 using ISoftViewerLibrary.Model.DicomOperator;
@@ -19,6 +20,7 @@ using ISoftViewerLibrary.Models.Events;
 namespace ISoftViewerLibrary.Services
 {
     #region QcMergeStudyCmdService
+
     /// <summary>
     /// 執行合併檢查命令
     /// </summary>
@@ -33,38 +35,61 @@ namespace ISoftViewerLibrary.Services
         /// <param name="svrConfiguration"></param>
         public QcMergeStudyCmdService(DbQueriesService<CustomizeTable> dbQryService,
             DbCommandService<CustomizeTable> dbCmdService,
-            EnvironmentConfiguration environmentConfiguration, IEnumerable<SvrConfigurationsV2> svrConfiguration) 
+            EnvironmentConfiguration environmentConfiguration, IEnumerable<SvrConfigurationsV2> svrConfiguration)
             : base(dbQryService)
         {
             DbCmdService = dbCmdService;
-            MergeSplitMappingTagTable = environmentConfiguration.MergeSplitMappingTagTable;
+            // MergeSplitMappingTagTable = environmentConfiguration.MergeSplitMappingTagTable;
+
+            //取得DICOM Tag對應資料
+            var mappingTableJsonStr = svrConfiguration
+                .ToList()
+                .FirstOrDefault(x => x.SysConfigName == "QCMergeSplitMappingTagTable")
+                ?.Value;
+
+            // Validate the mapping table
+            if (string.IsNullOrWhiteSpace(mappingTableJsonStr))
+                throw new Exception("Merge Mapping Tag Table is empty");
+
+            MergeSplitMappingTagTable = JsonSerializer.Deserialize<List<FieldToDcmTagMap>>(mappingTableJsonStr);
         }
 
         #region Fields
+
         /// <summary>
         /// 檢查層的表格
         /// </summary>
-        protected CustomizeTable OriginalStudyTable;
+        protected CustomizeTable FromStudyTable;
+
+        protected CustomizeTable ToStudyTable;
+
         /// <summary>
         /// 系列層的表格
         /// </summary>
-        protected CustomizeTable OriginalSeriesTable;
+        protected CustomizeTable FromSeriesTable;
+
+        protected CustomizeTable ToSeriesTable;
+
         /// <summary>
         /// 資料庫更新服務
         /// </summary>
         protected DbCommandService<CustomizeTable> DbCmdService;
+
         /// <summary>
         /// 註冊資料
         /// </summary>
         protected DataCorrection.V1.MergeStudyParameter Data;
+
         /// <summary>
         /// QC操作紀錄
         /// </summary>
         private QCOperationContext OperationContext { get; set; }
+
         /// <summary>
         /// Merge時mapping table
         /// </summary>
         private readonly List<FieldToDcmTagMap> MergeSplitMappingTagTable;
+
         #endregion
 
         #region Methods
@@ -73,7 +98,7 @@ namespace ISoftViewerLibrary.Services
         /// 註冊資料
         /// </summary>
         /// <param name="data"></param>
-        public override async Task RegistrationData(object data) 
+        public override async Task RegistrationData(object data)
         {
             Data = (DataCorrection.V1.MergeStudyParameter)data;
         }
@@ -103,26 +128,30 @@ namespace ISoftViewerLibrary.Services
                 if (await QueryUidTable(Data.ModifyUser, Data.FromStudyUID) == false ||
                     await QueryStorageDevice() == false)
                     throw new Exception("Failed to query to merge from table or storage device data!!");
-                
-                //取得要合併其它檢查的StudyTable          
-                if (CreateOriginalStudyTable(Data.ModifyUser, "DicomStudy", Data.ToStudyUID) == Task.FromResult(false))
-                    throw new Exception("Failed to query to merge study table !!");
 
-                string originalPatientId = TableElementHelper.FindNormalKeyField(OriginalStudyTable, "PatientID").Value.Trim();
+                //取得要合併其它檢查的StudyTable          
+                ToStudyTable = await CreateStudyTable(Data.ModifyUser, "DicomStudy", Data.ToStudyUID);
+                FromStudyTable = await CreateStudyTable(Data.ModifyUser, "DicomStudy", Data.FromStudyUID);
+
+                // 被合併的檢查不能Mapping
+                ValidateMappedStatus();
+
+                string originalPatientId =
+                    TableElementHelper.FindNormalKeyField(ToStudyTable, "PatientID").Value.Trim();
 
                 //取得要合併其它檢查的SeriesTable          
-                if (CreateOriginalSeriesTable(Data.ModifyUser, "DicomSeries", Data.ToStudyUID) == Task.FromResult(false))
-                    throw new Exception("Query to merge series table failed !!");    
-                                
+                ToSeriesTable = await CreateSeriesTable(Data.ModifyUser, "DicomSeries", Data.ToStudyUID);
+
                 //用隨機產生數字,之前用日期會有重覆問題
                 Random rdm = new();
                 int rdmNumber = rdm.Next(1, 999999);
                 string rdmValue = Convert.ToString(rdmNumber);
-                ICommonFieldProperty fieldProperty = TableElementHelper.FindField(OriginalStudyTable, "StudyInstanceUID");
+                ICommonFieldProperty fieldProperty = TableElementHelper.FindField(ToStudyTable, "StudyInstanceUID");
                 string newSeriesUidRoot;
                 //要判斷要合併其它檢查的StudyInstanceUID長度,不然有可能會超出UI的長度限度
                 if (fieldProperty.Value.Length >= 50)
-                    newSeriesUidRoot = "1.3.6.1.4.1.54514." + DateTime.Now.ToString("yyyyMMddHHmmss") + ".1.2." + rdmValue;
+                    newSeriesUidRoot = "1.3.6.1.4.1.54514." + DateTime.Now.ToString("yyyyMMddHHmmss") + ".1.2." +
+                                       rdmValue;
                 else
                     newSeriesUidRoot = fieldProperty.Value + ".1.2." + rdmValue;
                 int idxOfUid = 1;
@@ -155,7 +184,8 @@ namespace ISoftViewerLibrary.Services
                         if (dcmFile == null)
                             throw new Exception("        Can not open file : " + filePath);
                         //修改DICOM Tag
-                        if (ModifyDicomTag(dcmFile, originalPatientId, Data.ToStudyUID, newSeriesUid, out string newImgUID) == false)
+                        if (ModifyDicomTag(dcmFile, originalPatientId, Data.ToStudyUID, newSeriesUid,
+                                out string newImgUID) == false)
                             throw new Exception("        DICOM file modification failed : " + filePath);
 
                         //產生新檔案路徑
@@ -168,7 +198,7 @@ namespace ISoftViewerLibrary.Services
                         //更新影像表格裡的資料
                         _imgTable.UpdateKeyValueSwap();
                         //MOD BY JB 20210615 如果Image Table的Reference UID欄位已經有值,則保留最原始的資料
-                        _imgTable.UpdateReferenceUID(_imgTable.SOPInstanceUID.Value, _seTable.SeriesInstanceUID.Value)                        
+                        _imgTable.UpdateReferenceUID(_imgTable.SOPInstanceUID.Value, _seTable.SeriesInstanceUID.Value)
                             .UpdateInstanceUIDAndPath(newSeriesUid, newImgUID, dbFilePath, Data.ModifyUser);
                         //產生JPEG預覽圖
                         string dcmFilePath = Path.GetFullPath(newFilePath);
@@ -176,40 +206,46 @@ namespace ISoftViewerLibrary.Services
                         //若檔案存在,則刪除
                         if (File.Exists(jpgFilePath) == true)
                             File.Delete(jpgFilePath);
-                        
+
                         var image = new DicomImage(newFilePath);
 #pragma warning disable CA1416 // 驗證平台相容性
                         image.RenderImage().AsClonedBitmap().Save(jpgFilePath);
 #pragma warning restore CA1416 // 驗證平台相容性
-                              //using (IImage iimage = image.RenderImage())
-                              //{
-                              //    using (Bitmap bmp = iimage.AsClonedBitmap())
-                              //    {
-                              //        bmp.Save(jpgFilePath);
-                              //    }
-                              //}
-                              //記錄更新前和更新後的檔案路徑
+                        //using (IImage iimage = image.RenderImage())
+                        //{
+                        //    using (Bitmap bmp = iimage.AsClonedBitmap())
+                        //    {
+                        //        bmp.Save(jpgFilePath);
+                        //    }
+                        //}
+                        //記錄更新前和更新後的檔案路徑
                         UnmodifiedImageList.Add(filePath);
                         //NewlyGeneratedImageList.Add(newFilePath);
                     });
                     //更新系列資料表資料
                     _seTable.UpdateKeyValueSwap();
                     //MOD BY JB 20210615 如果Series Table的Reference UID欄位已經有值,則保留最原始的資料
-                    _seTable.UpdateReferenceInstanceUID(_seTable.SeriesInstanceUID.Value, _seTable.StudyInstanceUID.Value)                    
-                        .UpdateInstanceUIDAndData(newSeriesUid, Data.ToStudyUID, Data.ModifyUser);                    
+                    _seTable.UpdateReferenceInstanceUID(_seTable.SeriesInstanceUID.Value,
+                            _seTable.StudyInstanceUID.Value)
+                        .UpdateInstanceUIDAndData(newSeriesUid, Data.ToStudyUID, Data.ModifyUser);
 
                     Messages.Add("TobeSeriesTable.StudyInstanceUID.Value : " + _seTable.StudyInstanceUID.Value);
                     Messages.Add("TobeSeriesTable.ModifiedUser.Value : " + _seTable.ModifiedUser.Value);
-                    Messages.Add("TobeSeriesTable.ReferencedSeriesInstanceUID.Value : " + _seTable.ReferencedSeriesInstanceUID.Value);
-                    Messages.Add("TobeSeriesTable.ReferencedStudyInstanceUID.Value : " + _seTable.ReferencedStudyInstanceUID.Value);
+                    Messages.Add("TobeSeriesTable.ReferencedSeriesInstanceUID.Value : " +
+                                 _seTable.ReferencedSeriesInstanceUID.Value);
+                    Messages.Add("TobeSeriesTable.ReferencedStudyInstanceUID.Value : " +
+                                 _seTable.ReferencedStudyInstanceUID.Value);
                 });
 
-                TobeDcmStudyUidTable.UpdateReferenceInstanceUID(TobeDcmStudyUidTable.StudyInstanceUID.Value.Trim(), "Merged", Data.ModifyUser);
-                
-                Messages.Add("TobeDcmStudyUidTable.UpdateStudyInstanceUID.Value : " + TobeDcmStudyUidTable.StudyInstanceUID.Value);
-                Messages.Add("TobeDcmStudyUidTable.ReferencedStudyInstanceUID.Value : " + TobeDcmStudyUidTable.ReferencedStudyInstanceUID.Value);
+                TobeDcmStudyUidTable.UpdateReferenceInstanceUID(TobeDcmStudyUidTable.StudyInstanceUID.Value.Trim(),
+                    "Merged", Data.ModifyUser);
+
+                Messages.Add("TobeDcmStudyUidTable.UpdateStudyInstanceUID.Value : " +
+                             TobeDcmStudyUidTable.StudyInstanceUID.Value);
+                Messages.Add("TobeDcmStudyUidTable.ReferencedStudyInstanceUID.Value : " +
+                             TobeDcmStudyUidTable.ReferencedStudyInstanceUID.Value);
                 Messages.Add("TobeDcmStudyUidTable.ModifiedUser.Value : " + TobeDcmStudyUidTable.ModifiedUser.Value);
-                                
+
                 DbCmdService.TableElement = TobeDcmStudyUidTable;
                 if (await DbCmdService.AddOrUpdate(true) == false)
                 {
@@ -217,8 +253,10 @@ namespace ISoftViewerLibrary.Services
                     {
                         Messages.Add(msg);
                     }
+
                     throw new Exception("    *** This is a problem with the execute the DicomStudy Table *** ");
                 }
+
                 //更新狀態
                 await UpdateStudyMaintainStatusToDatabase();
                 //QC operation log
@@ -234,24 +272,26 @@ namespace ISoftViewerLibrary.Services
                 // OperationContext.WriteFailedRecord(ex.Message, ex.ToString());
                 throw new Exception(Message);
             }
+
             Result = OpResult.OpSuccess;
             //刪除舊有的Dicom檔案
             // AfterSuccessfulThenDeleteOldDcmFiles();
             Messages.Add("    *** Successful cross-study data image merge");
             OperationContext.WriteSuccessRecord();
             return true;
-        }        
+        }
+
         /// <summary>
         /// 建立原始的檢查表格
         /// </summary>
         /// <returns></returns>
-        protected async Task<bool> CreateOriginalStudyTable(string userid, string tableName, string studyUid)
+        protected async Task<CustomizeTable> CreateStudyTable(string userid, string tableName, string studyUid)
         {
             try
             {
                 List<PairDatas> pkeys = new()
                 {
-                    { new PairDatas { Name = "StudyInstanceUID", Value = studyUid } }                      
+                    { new PairDatas { Name = "StudyInstanceUID", Value = studyUid } }
                 };
                 List<PairDatas> nkeys = new()
                 {
@@ -265,32 +305,37 @@ namespace ISoftViewerLibrary.Services
                     { new PairDatas { Name = "Modality", Value = string.Empty } },
                     { new PairDatas { Name = "PerformingPhysiciansName", Value = string.Empty } },
                     { new PairDatas { Name = "NameofPhysiciansReading", Value = string.Empty } },
-                    { new PairDatas { Name = "StudyStatus", Value = string.Empty } }
+                    { new PairDatas { Name = "StudyStatus", Value = string.Empty } },
+                    { new PairDatas { Name = "Mapped", Type = FieldType.ftInt, Value = string.Empty } }
                 };
 
-                OriginalStudyTable = await DbQryService.BuildTable(tableName, pkeys, nkeys, userid)
-                                            .GetDataAsync();                
+                var table = await DbQryService.BuildTable(tableName, pkeys, nkeys, userid)
+                    .GetDataAsync();
+
+                if (table.DBDatasets.Any())
+                    return table;
+
+                throw new Exception($"Failed to query to merge study table on {studyUid}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Message = ex.Message;
                 Messages.Add(ex.Message);
                 Result = OpResult.OpFailure;
-                return false;
+                throw new Exception(Message);
             }
-            Result = OpResult.OpSuccess;
-            return true;
         }
+
         /// <summary>
         /// 建立原始的系列表格
         /// </summary>
         /// <returns></returns>
-        protected async Task<bool> CreateOriginalSeriesTable(string userid, string tableName, string studyUid)
+        protected async Task<CustomizeTable> CreateSeriesTable(string userid, string tableName, string studyUid)
         {
             try
             {
                 List<PairDatas> pkeys = new()
-                {                    
+                {
                     { new PairDatas { Name = "StudyInstanceUID", Value = studyUid } }
                 };
                 List<PairDatas> nkeys = new()
@@ -300,22 +345,26 @@ namespace ISoftViewerLibrary.Services
                     { new PairDatas { Name = "SeriesDate", Value = string.Empty } },
                     { new PairDatas { Name = "SeriesTime", Value = string.Empty } },
                     { new PairDatas { Name = "SeriesNumber", Value = string.Empty } },
-                    { new PairDatas { Name = "SeriesDescription", Value = string.Empty } },                    
+                    { new PairDatas { Name = "SeriesDescription", Value = string.Empty } },
                     { new PairDatas { Name = "PatientPosition", Value = string.Empty } },
                     { new PairDatas { Name = "BodyPartExamined", Value = string.Empty } }
                 };
-                OriginalSeriesTable = await DbQryService.BuildTable(tableName, pkeys, nkeys, userid)
-                                                .GetDataAsync();                
+
+                var table = await DbQryService.BuildTable(tableName, pkeys, nkeys, userid)
+                    .GetDataAsync();
+
+                if (table.DBDatasets.Any())
+                    return table;
+
+                throw new Exception($"Failed to query to merge series table on {studyUid}");
             }
             catch (Exception ex)
             {
                 Message = ex.Message;
                 Messages.Add(ex.Message);
                 Result = OpResult.OpFailure;
-                return false;
+                throw;
             }
-            Result = OpResult.OpSuccess;
-            return true;
         }
 
         /// <summary>
@@ -326,12 +375,14 @@ namespace ISoftViewerLibrary.Services
         {
             // From 移除 Merge status
             DcmStudyQCStatusTable = new DicomStudyQCStatusTable(Data.ModifyUser);
-            DcmStudyQCStatusTable.SetInstanceUIDAndMaintainType(Data.ToStudyUID, CommandFieldEvent.StudyMaintainType.Merged, 1);
+            DcmStudyQCStatusTable.SetInstanceUIDAndMaintainType(Data.ToStudyUID,
+                CommandFieldEvent.StudyMaintainType.Merged, 1);
             DbCmdService.TableElement = DcmStudyQCStatusTable;
             await DbCmdService.AddOrUpdate(true);
             // To 增加 Merge status，因為拆解是全拆解
             DcmStudyQCStatusTable = new DicomStudyQCStatusTable(Data.ModifyUser);
-            DcmStudyQCStatusTable.SetInstanceUIDAndMaintainType(Data.FromStudyUID, CommandFieldEvent.StudyMaintainType.Merged, 0);
+            DcmStudyQCStatusTable.SetInstanceUIDAndMaintainType(Data.FromStudyUID,
+                CommandFieldEvent.StudyMaintainType.Merged, 0);
             DbCmdService.TableElement = DcmStudyQCStatusTable;
             await DbCmdService.AddOrUpdate(true);
         }
@@ -339,7 +390,8 @@ namespace ISoftViewerLibrary.Services
         /// <summary>
         /// 更新Dicom基本資訊(設定來自Appsetting)
         /// </summary>
-        protected override bool ModifyDicomTag(DicomFile dcmFile, string newPatientId, string newStudyUID, string newSeriesUID, out string newImageUID)
+        protected override bool ModifyDicomTag(DicomFile dcmFile, string newPatientId, string newStudyUID,
+            string newSeriesUID, out string newImageUID)
         {
             try
             {
@@ -352,21 +404,23 @@ namespace ISoftViewerLibrary.Services
                     { new PairDatas { Name = "PatientId", Value = newPatientId } }
                 };
 
-                List<PairDatas> nkeys = MergeSplitMappingTagTable.Where(x=>x.Field != staticField).Select(mapper => new PairDatas { Name = mapper.Field, Value = string.Empty }).ToList();
+                List<PairDatas> nkeys = MergeSplitMappingTagTable.Where(x => x.Field != staticField)
+                    .Select(mapper => new PairDatas { Name = mapper.Field, Value = string.Empty }).ToList();
 
                 var table = DbQryService.BuildTable("DcmFindStudyLevelView", pkeys, nkeys).GetData();
 
                 DicomDataset dcmDataset = dcmFile.Dataset;
                 DicomOperatorHelper dicomOperator = new();
 
-                string value = dicomOperator.GetDicomValueToStringWithGroupAndElem(dcmDataset, DicomTag.SpecificCharacterSet.Group,
+                string value = dicomOperator.GetDicomValueToStringWithGroupAndElem(dcmDataset,
+                    DicomTag.SpecificCharacterSet.Group,
                     DicomTag.SpecificCharacterSet.Element, false);
                 bool isUtf8 = value.Contains("192");
 
                 foreach (var fieldToDcmTagMap in MergeSplitMappingTagTable)
                 {
                     var updateValue = "";
-                    if(fieldToDcmTagMap.Field == staticField)
+                    if (fieldToDcmTagMap.Field == staticField)
                     {
                         updateValue = fieldToDcmTagMap.Default;
                     }
@@ -375,14 +429,19 @@ namespace ISoftViewerLibrary.Services
                         var dbField = table.DBDatasets.First().First(x => x.FieldName == fieldToDcmTagMap.Field);
                         updateValue = dbField.Value;
                     }
-                    dicomOperator.ConvertTagStringToUIntGE(fieldToDcmTagMap.Tag, out ushort t_group, out ushort t_element);
-                    dicomOperator.WriteDicomValueInDataset(dcmDataset, new DicomTag(t_group, t_element), updateValue, isUtf8);
+
+                    dicomOperator.ConvertTagStringToUIntGE(fieldToDcmTagMap.Tag, out ushort t_group,
+                        out ushort t_element);
+                    dicomOperator.WriteDicomValueInDataset(dcmDataset, new DicomTag(t_group, t_element), updateValue,
+                        isUtf8);
                 }
 
                 //先產生SOP Instance UID資料
-                int instanceNumber = Convert.ToInt32(dicomOperator.GetDicomValueToString(dcmDataset, DicomTag.InstanceNumber, DicomVR.IS, false));
+                int instanceNumber =
+                    Convert.ToInt32(dicomOperator.GetDicomValueToString(dcmDataset, DicomTag.InstanceNumber, DicomVR.IS,
+                        false));
                 newImageUID = newSeriesUID + "." + Convert.ToString(instanceNumber);
-            }          
+            }
             catch (Exception ex)
             {
                 Message = ex.Message;
@@ -391,6 +450,7 @@ namespace ISoftViewerLibrary.Services
                 Result = OpResult.OpFailure;
                 return false;
             }
+
             Result = OpResult.OpSuccess;
             return true;
         }
@@ -402,10 +462,36 @@ namespace ISoftViewerLibrary.Services
         protected string GenerateQCMergeDesc()
         {
             string patientid = TableElementHelper.FindFieldFromDataset(QueryUidStudyTable, "PatientId", 0).Value;
-            string accessionNumber = TableElementHelper.FindFieldFromDataset(QueryUidStudyTable, "AccessionNumber", 0).Value;
+            string accessionNumber =
+                TableElementHelper.FindFieldFromDataset(QueryUidStudyTable, "AccessionNumber", 0).Value;
             return $"From patient id: {patientid}, accession number: {accessionNumber}";
         }
+
+        // Method to check if the study being merged has been mapped
+        private void ValidateMappedStatus()
+        {
+            // Check if the study from which data is being merged has been mapped
+            var isBeingMergeStudyHasMapped =
+                TableElementHelper.FindNormalKeyField(FromStudyTable, "Mapped").Value.Trim();
+
+            // If the study has been mapped, throw an exception
+            if (!string.IsNullOrEmpty(isBeingMergeStudyHasMapped) && int.Parse(isBeingMergeStudyHasMapped) == 1)
+            {
+                throw new Exception("The study has been mapped, please unmap it first.");
+            }
+
+            // Check if the study to which data is being merged has been mapped
+            isBeingMergeStudyHasMapped = TableElementHelper.FindNormalKeyField(ToStudyTable, "Mapped").Value.Trim();
+
+            // If the study has been mapped, throw an exception
+            if (!string.IsNullOrEmpty(isBeingMergeStudyHasMapped) && int.Parse(isBeingMergeStudyHasMapped) == 1)
+            {
+                throw new Exception("The study has been mapped, please unmap it first.");
+            }
+        }
+
         #endregion
     }
+
     #endregion
 }

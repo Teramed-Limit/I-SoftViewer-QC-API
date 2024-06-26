@@ -80,8 +80,6 @@ namespace ISoftViewerLibrary.Services
 
                 for (int seIdx = 0; seIdx < TobeDcmStudyUidTable.DetailElements.Count; seIdx++)
                 {
-                    var mergedIndexList = new List<int>();
-
                     if (TobeDcmStudyUidTable.DetailElements[seIdx] is not DicomSeriesUniqueIdentifiersTable _seTable)
                         throw new Exception("        Illegal series table");
 
@@ -96,10 +94,6 @@ namespace ISoftViewerLibrary.Services
                         //先組合完整的檔案路徑
                         if (_seTable.DetailElements[imIdx] is not DicomImageUniqueIdentifiersTable _imgTable)
                             throw new Exception("        Illegal image table");
-
-                        //被Merged的不要記錄到資料庫
-                        if (_imgTable.ReferencedSeriesInstanceUID.Value != string.Empty)
-                            mergedIndexList.Add(imIdx);
 
                         string dcmFilePath = string.Empty;
                         DicomFile dcmFile = GetDicomFile(_imgTable, dcmHelper, ref dcmFilePath);
@@ -116,12 +110,6 @@ namespace ISoftViewerLibrary.Services
 
                         modifiedDcmFile.Add(dcmFilePath, dcmFile);
                         _imgTable.UpdateKeyValueSwap();
-                    }
-
-                    mergedIndexList.Reverse();
-                    foreach (var skipImgIdx in mergedIndexList)
-                    {
-                        _seTable.DetailElements.RemoveAt(skipImgIdx);
                     }
                 }
 
