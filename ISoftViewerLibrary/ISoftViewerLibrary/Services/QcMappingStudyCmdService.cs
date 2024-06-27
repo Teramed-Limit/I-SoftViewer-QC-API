@@ -55,15 +55,16 @@ namespace ISoftViewerLibrary.Services
                 if (await DoseStudyExist(Data.Dataset))
                     throw new Exception("Study Instance UID duplicated.");
 
+                //Mapping資料
+                AssignPidNdStudyUid(Data.Dataset);
+
                 //取得要做Mapping的檢查,系列及影像，之後要去更新資料庫用
-                if (await QueryUidTable(Data.ModifyUser, Data.StudyInstanceUID, true) == false)
+                if (await QueryUidTable(Data.ModifyUser, Data.StudyInstanceUID, true, NewStudyInstanceUID) == false)
                     throw new Exception("Failed to query to mapping table or storage device data!!");
 
                 if (await CEchoSCP() == false)
                     throw new Exception("Failed to connect to PACS server!!");
 
-                //Mapping資料
-                AssignPidNdStudyUid(Data.Dataset);
 
                 //判斷NewPatientID和NewStudyInstanceUID是否有值,若沒有資料,要補上目前的資料
                 if (NewPatientID == string.Empty)

@@ -13,6 +13,7 @@ using ISoftViewerLibrary.Logics.QCOperation;
 using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.DTOs.PacsServer;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
+using ISoftViewerLibrary.Utils;
 
 namespace ISoftViewerLibrary.Services
 {
@@ -408,10 +409,14 @@ namespace ISoftViewerLibrary.Services
         /// </summary>
         /// <param name="studyUID"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> QueryUidTable(string userid, string studyUID, bool genNewUid = false)
+        protected virtual async Task<bool> QueryUidTable(string userid, string studyUID, bool genNewUid = false,
+            string newStudyUid = null)
         {
             try
             {
+                if (genNewUid && string.IsNullOrEmpty(newStudyUid))
+                    newStudyUid = UidUtils.GenerateStudyInstanceUID().Trim();
+
                 var studyTable = await QueryStudyTable(studyUID);
                 QueryUidStudyTable = studyTable;
                 string st_patientid = TableElementHelper.FindFieldFromDataset(studyTable, "PatientId", 0).Value;
@@ -437,7 +442,8 @@ namespace ISoftViewerLibrary.Services
                         .FindFieldFromDataset(seriesTable, "ReferencedStudyInstanceUID", idxOfSe).Value;
                     string se_uid = TableElementHelper.FindFieldFromDataset(seriesTable, "SeriesInstanceUID", idxOfSe)
                         .Value;
-                    string newSeUid = genNewUid ? DicomUIDGenerator.GenerateDerivedFromUUID().UID : se_uid;
+
+                    string newSeUid = genNewUid ? UidUtils.GenerateSeriesInstanceUID(newStudyUid, idxOfSe) : se_uid;
                     string ref_se_uid = TableElementHelper
                         .FindFieldFromDataset(seriesTable, "ReferencedSeriesInstanceUID", idxOfSe).Value;
                     tobeSeriesTable.SetInstanceUID(se_uid, newSeUid, studyUID, ref_st_uid, ref_se_uid);
@@ -451,7 +457,7 @@ namespace ISoftViewerLibrary.Services
                         DicomImageUniqueIdentifiersTable tobeImageTable = new(userid);
                         string sopUid = TableElementHelper.FindFieldFromDataset(imageTable, "SOPInstanceUID", idxOfImg)
                             .Value;
-                        string newSopUid = genNewUid ? DicomUIDGenerator.GenerateDerivedFromUUID().UID : sopUid;
+                        string newSopUid = genNewUid ? UidUtils.GenerateSeriesInstanceUID(newSeUid, idxOfImg) : sopUid;
                         string stgDevice = TableElementHelper
                             .FindFieldFromDataset(imageTable, "StorageDeviceID", idxOfImg).Value;
                         string filePath = TableElementHelper.FindFieldFromDataset(imageTable, "FilePath", idxOfImg)
@@ -775,9 +781,10 @@ namespace ISoftViewerLibrary.Services
         /// <param name="userid"></param>
         /// <param name="studyUID"></param>
         /// <returns></returns>
-        protected override async Task<bool> QueryUidTable(string userid, string studyUID, bool genNewUid = false)
+        protected override async Task<bool> QueryUidTable(string userid, string studyUID, bool genNewUid = false,
+            string newStudyUid = null)
         {
-            bool result = await base.QueryUidTable(userid, studyUID, genNewUid);
+            bool result = await base.QueryUidTable(userid, studyUID, genNewUid, newStudyUid);
             if (result == true)
             {
                 string patientId = TobeDcmStudyUidTable.PatientID.Value;
@@ -911,7 +918,7 @@ namespace ISoftViewerLibrary.Services
 
             return await Task.FromResult(result);
         }
-        
+
         /// <summary>
         /// 傳送DICOM檔案到遠端DICOM Service Provider
         /// </summary>

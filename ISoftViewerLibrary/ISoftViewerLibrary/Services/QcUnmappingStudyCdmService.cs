@@ -127,7 +127,7 @@ namespace ISoftViewerLibrary.Services
                         {
                             continue;
                         }
-                        
+
                         List<DataCorrection.V1.DcmTagData> dcmTagDatas;
                         dcmTagDatas =
                             JsonSerializer.Deserialize<List<DataCorrection.V1.DcmTagData>>(_imgTable.UnmappedDcmTag
@@ -162,11 +162,11 @@ namespace ISoftViewerLibrary.Services
                         //Unmapping資料
                         UnmappingDatasetToDcmFile(dcmTagDatas, dcmFile, dcmHelper);
                         modifiedDcmFile.Add(dcmFilePath, dcmFile);
-                        
+
                         // 更新Instance UID
                         newSeriesUID = dcmFile.Dataset.GetSingleValue<string>(DicomTag.SeriesInstanceUID);
                         newSopInstanceUID = dcmFile.Dataset.GetSingleValue<string>(DicomTag.SOPInstanceUID);
-                        
+
                         //清除Mapping記錄欄位
                         _imgTable.UpdateInstanceUID(newSeriesUID, newSopInstanceUID);
                         _imgTable.UpdateUnmappedDcmTag("");
@@ -176,7 +176,8 @@ namespace ISoftViewerLibrary.Services
 
                     if (haveProcessed == true)
                     {
-                        _seTable.UpdateInstanceUIDAndData(updateUID: newSeriesUID, studyUID: OriginalStudyInstanceUID, Data.ModifyUser);
+                        _seTable.UpdateInstanceUIDAndData(updateUID: newSeriesUID, studyUID: OriginalStudyInstanceUID,
+                            Data.ModifyUser);
                         _seTable.UpdateKeyValueSwap();
                     }
                 }
@@ -381,9 +382,10 @@ namespace ISoftViewerLibrary.Services
         /// <param name="userid"></param>
         /// <param name="studyUID"></param>
         /// <returns></returns>
-        protected override async Task<bool> QueryUidTable(string userid, string studyUID, bool genNewUid = false)
+        protected override async Task<bool> QueryUidTable(string userid, string studyUID, bool genNewUid = false,
+            string? newStudyUid = null)
         {
-            bool result = await base.QueryUidTable(userid, studyUID, genNewUid);
+            bool result = await base.QueryUidTable(userid, studyUID, genNewUid, newStudyUid);
             // if (result)
             // {
             //     // 如果舊的PatientId還有存在於Patient層，就不用去修改Patient層

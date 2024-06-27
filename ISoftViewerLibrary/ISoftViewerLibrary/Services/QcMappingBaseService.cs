@@ -91,9 +91,9 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
         data?.ForEach(data =>
         {
             if (data.Group == DicomTag.PatientID.Group && data.Elem == DicomTag.PatientID.Element)
-                NewPatientID = data.Value;
+                NewPatientID = data.Value.Trim();
             if (data.Group == DicomTag.StudyInstanceUID.Group && data.Elem == DicomTag.StudyInstanceUID.Element)
-                NewStudyInstanceUID = data.Value;
+                NewStudyInstanceUID = data.Value.Trim();
         });
 
         OriginalPatientID = Data.PatientId;
@@ -141,8 +141,7 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
     protected bool MappingDatasetToDcmFile(
         List<DataCorrection.V1.DcmTagData> dataset,
         DicomFile dcmFile,
-        DicomOperatorHelper dcmHelper,
-        bool generateNewUid = false)
+        DicomOperatorHelper dcmHelper)
     {
         bool result = false;
         try
@@ -163,13 +162,6 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
 
                 result = true;
             });
-
-            if (generateNewUid)
-            {
-                dcmFileDataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
-                dcmFileDataset.AddOrUpdate(DicomTag.SeriesInstanceUID, DicomUIDGenerator.GenerateDerivedFromUUID());
-                dcmFileDataset.AddOrUpdate(DicomTag.SOPInstanceUID, DicomUIDGenerator.GenerateDerivedFromUUID());
-            }
         }
         catch (Exception ex)
         {

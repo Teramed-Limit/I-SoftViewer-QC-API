@@ -10,6 +10,7 @@ using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.DTOs.PacsServer;
 using ISoftViewerLibrary.Models.Interfaces;
 using ISoftViewerLibrary.Models.ValueObjects;
+using ISoftViewerLibrary.Utils;
 
 namespace ISoftViewerLibrary.Services
 {
@@ -57,7 +58,8 @@ namespace ISoftViewerLibrary.Services
                     //因為來自於同一個PaitentId,所以第二個不需要去改資料庫
                     if (index == 0)
                     {
-                        if (await QueryUidTable(Data.ModifyUser, Data.StudyInstanceUID, true) == false)
+                        if (await QueryUidTable(Data.ModifyUser, Data.StudyInstanceUID, true, NewStudyInstanceUID) ==
+                            false)
                             throw new Exception("Failed to query to mapping table or storage device data!!");
                     }
 
@@ -102,20 +104,31 @@ namespace ISoftViewerLibrary.Services
                             DicomFile dcmFile = GetDicomFile(_imgTable, dcmHelper, ref dcmFilePath);
 
                             //Mapping資料,只要有檔案不需要調整,則不繼續處理，第二個需要處理Instance UID
-                            if ((haveProcessed &= MappingDatasetToDcmFile(dataset, dcmFile, dcmHelper, index > 0)) ==
-                                false)
+                            if ((haveProcessed &= MappingDatasetToDcmFile(dataset, dcmFile, dcmHelper)) == false)
                                 break;
 
-                            // 更新Instance UID
-                            if (index == 0)
+                            // 第二個檢查為新增的，要自己產生Instance UID
+                            switch (index)
                             {
-                                dcmFile.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
-                                dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID,
-                                    _seTable.UpdateSeriesInstanceUID.Value.Trim());
-                                dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID,
-                                    _imgTable.UpdateSOPInstanceUID.Value.Trim());
-                                referenceStudyInstanceUID =
-                                    dcmFile.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+                                // 新增Instance UID
+                                case > 0:
+
+                                    dcmFile.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
+                                    var seInsUID = UidUtils.GenerateSeriesInstanceUID(NewStudyInstanceUID, seIdx);
+                                    dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID, seInsUID);
+                                    var sopInsUID = UidUtils.GenerateSopInstanceUID(seInsUID, imIdx);
+                                    dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID, sopInsUID);
+                                    break;
+                                // 更新Instance UID
+                                case 0:
+                                    dcmFile.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
+                                    dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID,
+                                        _seTable.UpdateSeriesInstanceUID.Value.Trim());
+                                    dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID,
+                                        _imgTable.UpdateSOPInstanceUID.Value.Trim());
+                                    referenceStudyInstanceUID =
+                                        dcmFile.Dataset.GetSingleValue<string>(DicomTag.StudyInstanceUID);
+                                    break;
                             }
 
                             modifiedDcmFile.Add(dcmFilePath, dcmFile);
