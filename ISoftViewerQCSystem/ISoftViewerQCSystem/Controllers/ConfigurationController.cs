@@ -183,7 +183,7 @@ namespace ISoftViewerQCSystem.Controllers
 
                 var serviceMachineName = _configuration["MachineName"];
 #pragma warning disable CA1416
-                var sc = new ServiceController("TeraMedArchivingService", serviceMachineName);
+                var sc = new ServiceController("TeraLinkaDicomService", serviceMachineName);
                 if ((sc.Status.Equals(ServiceControllerStatus.Stopped)) ||
                     (sc.Status.Equals(ServiceControllerStatus.StopPending)))
                 {

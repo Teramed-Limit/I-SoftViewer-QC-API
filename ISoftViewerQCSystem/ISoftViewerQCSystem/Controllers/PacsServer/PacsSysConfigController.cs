@@ -158,7 +158,7 @@ namespace ISoftViewerQCSystem.Controllers
             //先判斷TreaMed Window Service是否存在
             bool wndServiceIsExists = false;
             bool wndServiceIsStartup = false;
-            const string teraMedArchivingService = "TeraMedArchivingService";
+            const string teraMedArchivingService = "TeraLinkaDicomService";
             ServiceController[] services = ServiceController.GetServices();
             ServiceController teramedWndService = null;
             foreach (ServiceController service in services)
