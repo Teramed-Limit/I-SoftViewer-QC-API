@@ -841,6 +841,19 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.QualityControlController">
+            <summary>
+                組態設定控制器
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.QualityControlController.ModifyDicomTagsInFiles(System.Collections.Generic.List{ISoftViewerLibrary.Models.DTOs.SearchImagePathView},ISoftViewerLibrary.Models.BodyRequestParams.ImageTagModify)">
+            <summary>
+            修改 DICOM 文件中的標籤並保存
+            </summary>
+            <param name="imagePaths">DICOM 文件路徑列表</param>
+            <param name="imageTagModify">要修改的標籤信息</param>
+            <returns>修改結果</returns>
+        </member>
         <member name="T:ISoftViewerQCSystem.Controllers.RoleController">
             <summary>
             角色控制器
