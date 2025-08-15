@@ -26,11 +26,13 @@ using ISoftViewerQCSystem.Hubs.Services;
 using ISoftViewerQCSystem.Hubs.UserIdProvider;
 using ISoftViewerQCSystem.JWT;
 using ISoftViewerQCSystem.Mapper;
+using ISoftViewerQCSystem.Middleware;
 using ISoftViewerQCSystem.Services;
 using ISoftViewerQCSystem.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -94,7 +96,7 @@ namespace ISoftViewerQCSystem
                 // dcmSendService.Bind(config);
 
                 config.VirtualFilePath = Configuration.GetSection("VirtualFilePath").Value;
-                
+
                 config.AnsiEncoding = Configuration.GetSection("AnsiEncoding").Value;
 
                 return config;
@@ -137,7 +139,7 @@ namespace ISoftViewerQCSystem
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
             services.AddSingleton<ConnectionMapping<string>>();
             services.AddSingleton<SystemConfigService>();
-            
+
             services.AddScoped<PacsDBOperationService>();
             services.AddScoped<DicomTagService>();
             services.AddScoped<QCOperationContext>();
@@ -175,13 +177,13 @@ namespace ISoftViewerQCSystem
             services.AddScoped<QCOperationRecordViewService>();
             services.AddScoped<StaticOptionsService>();
             services.AddScoped<QCAutoMappingConfigService>();
-            
+
             // services.AddAutoMapper(typeof(Startup));
             services.AddSingleton(provider => new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new ServiceMappings(Configuration));
             }).CreateMapper());
-            
+
             services.AddControllers(options =>
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new CamelcaseParameterTransformer()));
@@ -272,7 +274,7 @@ namespace ISoftViewerQCSystem
 
             if (env.IsDevelopment())
             {
-                // app.UseSerilogRequestLogging();
+                app.UseSerilogRequestLogging();
             }
 
             app.UseAuthentication();
@@ -284,8 +286,33 @@ namespace ISoftViewerQCSystem
                 endpoints.MapControllers().RequireCors("AllowAll");
                 // endpoints.MapHub<ChatHub>("/hubs/chat").RequireCors("AllowAll");
             });
+            
+            // 這裡改用 MapWhen 攔截 /api 路徑，檢查是否匹配 Endpoint
+            app.MapWhen(
+                context => context.Request.Path.StartsWithSegments("/api"),
+                apiApp =>
+                {
+                    apiApp.Use(async (context, next) =>
+                    {
+                        var endpoint = context.GetEndpoint();
+                        if (endpoint == null)
+                        {
+                            context.Response.StatusCode = 404;
+                            context.Response.ContentType = "application/json";
+                            await context.Response.WriteAsync("{\"error\":\"API endpoint not found.\"}");
+                        }
+                        else
+                        {
+                            await next();
+                        }
+                    });
+                }
+            );
 
-            app.UseSpa(spa => { spa.Options.SourcePath = "ClientApp"; });
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "ClientApp";
+            });
         }
     }
 }
