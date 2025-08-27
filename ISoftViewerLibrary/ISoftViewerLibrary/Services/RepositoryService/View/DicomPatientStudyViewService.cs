@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
+using Serilog.Core;
 
 namespace ISoftViewerLibrary.Services.RepositoryService.View
 {

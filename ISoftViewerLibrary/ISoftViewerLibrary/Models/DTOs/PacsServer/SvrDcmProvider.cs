@@ -72,7 +72,9 @@ namespace ISoftViewerLibrary.Models.DTOs.PacsServer
         [Description("QR Modal SCP")]
         dstQRModalSCP = 3,
         [Description("Storage Commitment SCP")]
-        dstStorageCommitmentSCP = 4
+        dstStorageCommitmentSCP = 4,
+        [Description("Combined Store Provider")]
+        dstCombinedProviderWithoutWL = 5
     };
     /// <summary>
     /// 寫入資料庫資料物件
