@@ -6,6 +6,7 @@ using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
+using ISoftViewerQCSystem.Models;
 using ISoftViewerQCSystem.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -90,6 +91,36 @@ namespace ISoftViewerQCSystem.Controllers
             return await ModifyDicomTag(modifyTag, "SOPInstanceUID", sopInstanceUID);
         }
 
+        /// <summary>
+        ///     Batch modify image tags where in studyInstanceUID
+        /// </summary>
+        [HttpPost("batch/studyInstanceUID/{studyInstanceUID}")]
+        public async Task<ActionResult> BatchModifyTagInStudyInstanceUID(
+            [FromBody] BatchModifyDicomTagData batchModifyTags, string studyInstanceUID)
+        {
+            return await BatchModifyDicomTags(batchModifyTags, "StudyInstanceUID", studyInstanceUID);
+        }
+
+        /// <summary>
+        ///     Batch modify image tags where in SeriesInstanceUID
+        /// </summary>
+        [HttpPost("batch/seriesInstanceUID/{seriesInstanceUID}")]
+        public async Task<ActionResult> BatchModifyTagInSeriesInstanceUID(
+            [FromBody] BatchModifyDicomTagData batchModifyTags, string seriesInstanceUID)
+        {
+            return await BatchModifyDicomTags(batchModifyTags, "SeriesInstanceUID", seriesInstanceUID);
+        }
+
+        /// <summary>
+        ///     Batch modify image tags where in SopInstanceUID
+        /// </summary>
+        [HttpPost("batch/sopInstanceUID/{sopInstanceUID}")]
+        public async Task<ActionResult> BatchModifyTagSopInstanceUID(
+            [FromBody] BatchModifyDicomTagData batchModifyTags, string sopInstanceUID)
+        {
+            return await BatchModifyDicomTags(batchModifyTags, "SOPInstanceUID", sopInstanceUID);
+        }
+
         private async Task<ActionResult> ModifyDicomTag(ModifyDicomTagData modifyTag, string key, string value)
         {
             try
@@ -109,6 +140,29 @@ namespace ISoftViewerQCSystem.Controllers
                 return BadRequest(e.Message);
             }
             
+        }
+
+        private async Task<ActionResult> BatchModifyDicomTags(BatchModifyDicomTagData batchModifyTags, string key, string value)
+        {
+            try
+            {
+                if (batchModifyTags?.Tags == null || !batchModifyTags.Tags.Any())
+                {
+                    return BadRequest("No tags provided for modification");
+                }
+
+                var result = await _dicomTagService.ModifyTags(
+                    User.Identity.Name,
+                    key,
+                    value,
+                    batchModifyTags.Tags,
+                    _dicomOperationNodeService.GetLocalCStoreNode());
+                return result ? Ok() : BadRequest("Unexpected error");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
     }
 }

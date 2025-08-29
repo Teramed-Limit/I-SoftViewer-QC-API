@@ -12,6 +12,7 @@ using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
 using ISoftViewerLibrary.Utils;
+using ISoftViewerQCSystem.Models;
 using Log = Serilog.Log;
 
 namespace ISoftViewerQCSystem.Services
@@ -172,6 +173,114 @@ namespace ISoftViewerQCSystem.Services
             }
         }
 
+        /// <summary>
+        ///     批量修改多個 Tags
+        /// </summary>
+        public async Task<bool> ModifyTags(
+            string userName,
+            string instanceUIDKey,
+            string instanceUIDValue,
+            List<ModifyDicomTagData> modifyTags,
+            DicomOperationNodes dicomOperationNodes,
+            bool createNewStudy = false)
+        {
+            if (modifyTags == null || !modifyTags.Any())
+                return false;
+
+            var modifyDcmFiles = new List<string>();
+            var studyInsUid = "";
+            var modificationRecords = new List<(string oriValue, string newValue, DicomDictionaryEntry dictionary)>();
+
+            try
+            {
+                var where = new List<PairDatas> { new() { Name = instanceUIDKey, Value = instanceUIDValue } };
+                var imagePathList = _dicomImagePathService.Get(where);
+
+                // 照常理，多個dcm檔都隸屬於同一個檢查
+                foreach (var filePath in imagePathList.Select(x => x.ImageFullPath))
+                {
+                    if (!File.Exists(filePath))
+                    {
+                        Log.Error($"{filePath}, file not exist.");
+                        continue;
+                    }
+
+                    var copyDcm = Path.Combine(Path.GetDirectoryName(filePath),
+                        Path.GetFileNameWithoutExtension(filePath) + "_modifier" + ".dcm");
+
+                    modifyDcmFiles.Add(copyDcm);
+
+                    File.Copy(filePath, copyDcm, true);
+
+                    // Modify Multiple Tags
+                    var dataset = (await DicomFile.OpenAsync(copyDcm)).Dataset;
+                    var characterSet = _dicomOperator.GetDicomValueToStringWithGroupAndElem(dataset,
+                        DicomTag.SpecificCharacterSet.Group,
+                        DicomTag.SpecificCharacterSet.Element,
+                        false);
+                    var isUtf8 = characterSet.Contains("192");
+
+                    // 記錄修改前的值（只需要記錄一次）
+                    if (modificationRecords.Count == 0)
+                    {
+                        foreach (var tag in modifyTags)
+                        {
+                            var dicomTag = new DicomTag(tag.Group, tag.Element);
+                            var oriValue = dataset.GetString(dicomTag);
+                            var dicomDictionary = dicomTag.DictionaryEntry;
+                            modificationRecords.Add((oriValue, tag.Value, dicomDictionary));
+                        }
+                    }
+
+                    // 批量修改 Tags
+                    foreach (var tag in modifyTags)
+                    {
+                        var dicomTag = new DicomTag(tag.Group, tag.Element);
+                        _dicomOperator.WriteDicomValueInDataset(dataset, dicomTag, tag.Value, isUtf8);
+                    }
+
+                    studyInsUid = dataset.GetString(DicomTag.StudyInstanceUID);
+
+                    // Collect dataset
+                    _dcmRepository.DicomDatasets.Add(dataset);
+
+                    // Logging
+                    Log.Information($"*** Batch Tag Modification ***");
+                    Log.Information($"StudyInstanceUID {dataset.GetString(DicomTag.StudyInstanceUID)}");
+                    Log.Information($"SeriesInstanceUID {dataset.GetString(DicomTag.SeriesInstanceUID)}");
+                    Log.Information($"SOPInstanceUID {dataset.GetString(DicomTag.SOPInstanceUID)}");
+                    foreach (var record in modificationRecords)
+                    {
+                        Log.Information($"Modify {record.dictionary.Tag} from {record.oriValue} to {record.newValue}");
+                    }
+                }
+
+                // 處理 PatientId 變更（如果有）
+                var patientIdRecord = modificationRecords.FirstOrDefault(r => 
+                    r.dictionary.Tag.ToString() == "(0010,0020)" && r.oriValue != r.newValue);
+                if (patientIdRecord != default)
+                {
+                    UpdateDicomPatientToDatabase(patientIdRecord.oriValue, patientIdRecord.newValue);
+                    UpdateDicomStudyToDatabase(patientIdRecord.oriValue, patientIdRecord.newValue, studyInsUid);
+                }
+
+                // 記錄所有修改操作
+                RecordingBatchTagOperation(instanceUIDKey, modificationRecords, studyInsUid, userName);
+
+                //上傳Teramed PACS Service
+                return await StorePacs(dicomOperationNodes);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"{e.Message}");
+                throw;
+            }
+            finally
+            {
+                foreach (var dcm in modifyDcmFiles) File.Delete(dcm);
+            }
+        }
+
         // private Task GenerateStudy(IEnumerable<string> modifyDcmFiles)
         // {
         //     // 列屬於同一個檢查
@@ -223,6 +332,29 @@ namespace ISoftViewerQCSystem.Services
                     desc = $"Apply image, {desc}";
                     break;
             }
+
+            _qcOperationContext.SetLogger(new ModifyTagLogger());
+            _qcOperationContext.SetParams(userName, studyInsUid, "", desc);
+            _qcOperationContext.WriteSuccessRecord();
+        }
+
+        // 記錄批量標籤修改操作
+        private void RecordingBatchTagOperation(
+            string type, 
+            List<(string oriValue, string newValue, DicomDictionaryEntry dictionary)> modificationRecords, 
+            string studyInsUid, 
+            string userName)
+        {
+            var modifications = string.Join("; ", modificationRecords.Select(r => 
+                $"modify {r.dictionary.Keyword}{r.dictionary.Tag} from '{r.oriValue}' to '{r.newValue}'"));
+
+            var desc = type switch
+            {
+                "StudyInstanceUID" => $"Apply study's images, batch modify tags: {modifications}",
+                "SeriesInstanceUID" => $"Apply series's images, batch modify tags: {modifications}",
+                "SOPInstanceUID" => $"Apply image, batch modify tags: {modifications}",
+                _ => $"Batch modify tags: {modifications}"
+            };
 
             _qcOperationContext.SetLogger(new ModifyTagLogger());
             _qcOperationContext.SetParams(userName, studyInsUid, "", desc);

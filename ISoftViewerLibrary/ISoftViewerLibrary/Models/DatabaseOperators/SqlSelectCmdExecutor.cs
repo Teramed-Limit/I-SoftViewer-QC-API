@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using ISoftViewerLibrary.Models.DTOs;
+using Log = Serilog.Log;
 
 namespace ISoftViewerLibrary.Models.DatabaseOperator
 {
@@ -156,6 +157,7 @@ namespace ISoftViewerLibrary.Models.DatabaseOperator
             }
             catch (SystemException e)
             {
+                Log.Error(e, "ExecuteSelectCmd Error");
                 DbMessages = e.Message;
                 return false;
             }
@@ -288,6 +290,7 @@ namespace ISoftViewerLibrary.Models.DatabaseOperator
             }
             catch (SystemException e)
             {
+                Log.Error(e, "ExecuteSelectCmd Error");
                 DbMessages = e.Message;
                 return false;
             }
@@ -374,6 +377,7 @@ namespace ISoftViewerLibrary.Models.DatabaseOperator
             }
             catch (SystemException e)
             {
+                Log.Error(e, "ExecuteSelectCmd Error");
                 DbMessages = e.Message;
                 return false;
             }

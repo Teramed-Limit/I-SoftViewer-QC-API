@@ -429,6 +429,21 @@
                 Modify image tag where in SopInstanceUID
             </summary>
         </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.BatchModifyTagInStudyInstanceUID(ISoftViewerQCSystem.Models.BatchModifyDicomTagData,System.String)">
+            <summary>
+                Batch modify image tags where in studyInstanceUID
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.BatchModifyTagInSeriesInstanceUID(ISoftViewerQCSystem.Models.BatchModifyDicomTagData,System.String)">
+            <summary>
+                Batch modify image tags where in SeriesInstanceUID
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomTagController.BatchModifyTagSopInstanceUID(ISoftViewerQCSystem.Models.BatchModifyDicomTagData,System.String)">
+            <summary>
+                Batch modify image tags where in SopInstanceUID
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Controllers.EchoDcmServiceController">
             <summary>
                 查詢控制器
@@ -1208,6 +1223,16 @@
                 QC操作紀錄
             </summary>
         </member>
+        <member name="T:ISoftViewerQCSystem.Models.BatchModifyDicomTagData">
+            <summary>
+                批量修改 DICOM Tag 的資料模型
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Models.BatchModifyDicomTagData.Tags">
+            <summary>
+                要修改的 Tag 清單
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Models.HisLogStatusData">
             <summary>
             執行Log時,所記錄的訊息與結果
@@ -1274,6 +1299,11 @@
         <member name="M:ISoftViewerQCSystem.Services.DicomTagService.ModifyTag(System.String,System.String,System.String,System.UInt16,System.UInt16,System.String,ISoftViewerLibrary.Models.DTOs.DicomOperationNodes,System.Boolean)">
             <summary>
                 修改Tag
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DicomTagService.ModifyTags(System.String,System.String,System.String,System.Collections.Generic.List{ISoftViewerLibrary.Models.DTOs.ModifyDicomTagData},ISoftViewerLibrary.Models.DTOs.DicomOperationNodes,System.Boolean)">
+            <summary>
+                批量修改多個 Tags
             </summary>
         </member>
         <member name="T:ISoftViewerQCSystem.Startup">

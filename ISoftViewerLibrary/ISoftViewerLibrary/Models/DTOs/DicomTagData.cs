@@ -28,6 +28,5 @@ namespace ISoftViewerLibrary.Models.DTOs
 
     public class ModifyDicomTagData : DicomTagData
     {
-        public List<SearchImagePathView> DicomImage  { get; set; }
     }
 }
