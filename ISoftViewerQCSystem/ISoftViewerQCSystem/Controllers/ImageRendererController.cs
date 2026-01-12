@@ -1,6 +1,7 @@
 ﻿using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.View;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ImageRendererController : ControllerBase
     {
         private readonly IConfiguration _configuration;

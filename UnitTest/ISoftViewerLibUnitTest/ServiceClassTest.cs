@@ -130,7 +130,7 @@ namespace ISoftViewerLibUnitTest
             }
 
             Assert.IsTrue(result.FileSetIDs.Any());
-            Assert.AreNotEqual(result.FileSetIDs, 0);
+            Assert.AreNotEqual(result.FileSetIDs.Count(), 0);
         }
 
         [TestMethod]

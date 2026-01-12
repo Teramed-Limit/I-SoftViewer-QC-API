@@ -5,12 +5,14 @@ using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.View;
 using ISoftViewerLibrary.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISoftViewerQCSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ExportDicomController : ControllerBase
     {
         private readonly DicomImagePathViewService _dicomImagePathService;

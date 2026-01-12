@@ -8,6 +8,7 @@ using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
 using ISoftViewerQCSystem.Models;
 using ISoftViewerQCSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -20,6 +21,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DicomTagController : ControllerBase
     {
         private readonly IConfiguration _configuration;

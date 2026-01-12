@@ -8,6 +8,7 @@ using System.ServiceProcess;
 using ISoftViewerLibrary.Models.BodyRequestParams;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,6 +20,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AnnotationController : ControllerBase
     {
         private readonly DicomImageService _dicomImageService;

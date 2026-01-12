@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using ISoftViewerLibrary.Model.DicomOperator;
 using Dicom;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -31,6 +32,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QualityControlController : ControllerBase
     {
         private readonly DicomImagePathViewService _dicomImagePathService;

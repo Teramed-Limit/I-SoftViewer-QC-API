@@ -1,6 +1,7 @@
 ﻿using ISoftViewerLibrary.Applications.Interface;
 using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerQCSystem.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -15,6 +16,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SearchDcmServiceController : ControllerBase, IHandleSearch
     {
         /// <summary>

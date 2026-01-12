@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ISoftViewerQCSystem.Models;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerLibrary.Models.DTOs.PacsServer;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,6 +16,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PacsServiceNodeController : ControllerBase
     {
         /// <summary>

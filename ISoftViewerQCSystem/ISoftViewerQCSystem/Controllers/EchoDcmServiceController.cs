@@ -9,6 +9,7 @@ using ISoftViewerLibrary.Models.Interfaces;
 using ISoftViewerLibrary.Models.ValueObjects;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -20,6 +21,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EchoDcmServiceController : ControllerBase
     {
         /// <summary>

@@ -24,7 +24,6 @@ using ISoftViewerQCSystem.Applications;
 using ISoftViewerQCSystem.Hubs;
 using ISoftViewerQCSystem.Hubs.Services;
 using ISoftViewerQCSystem.Hubs.UserIdProvider;
-using ISoftViewerQCSystem.JWT;
 using ISoftViewerQCSystem.Mapper;
 using ISoftViewerQCSystem.Middleware;
 using ISoftViewerQCSystem.Services;
@@ -41,6 +40,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using TeraLinkaAuth.Extensions;
 using static ISoftViewerQCSystem.Applications.GeneralApplicationService;
 using Log = Serilog.Log;
 
@@ -132,10 +132,11 @@ namespace ISoftViewerQCSystem
             services.AddScoped<IDcmRepository, DcmOpRepository>();
             services.AddTransient<IDcmCqusDatasets, DcmSendServiceHelper>();
 
-            var jwtTokenConfig = Configuration.GetSection("JWT").Get<JwtTokenConfig>();
+            // TeraLinkaAuth 服務註冊
+            services.AddTeraLinkaAuth(Configuration);
+            services.AddTeraLinkaJwtAuthentication(Configuration);
+            services.AddTeraLinkaAuthorization();
 
-            services.AddSingleton(jwtTokenConfig);
-            services.AddSingleton<AuthService>();
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
             services.AddSingleton<ConnectionMapping<string>>();
             services.AddSingleton<SystemConfigService>();
@@ -162,9 +163,6 @@ namespace ISoftViewerQCSystem
             services.AddScoped<ICommonRepositoryService<SearchImagePathView>, DbTableService<SearchImagePathView>>();
 
             // Table Service
-            services.AddScoped<UserAccountService>();
-            services.AddScoped<QcFunctionService>();
-            services.AddScoped<UserRoleService>();
             services.AddScoped<DicomOperationNodeService>();
             services.AddScoped<DicomDestinationNodeService>();
             services.AddScoped<DicomPatientService>();
@@ -188,23 +186,6 @@ namespace ISoftViewerQCSystem
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new CamelcaseParameterTransformer()));
             });
-
-            // services.AddAuthentication(x =>
-            // {
-            //     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            // }).AddJwtBearer(options =>
-            // {
-            //     options.TokenValidationParameters = new TokenValidationParameters
-            //     {
-            //         ValidateIssuer = true,
-            //         ValidateAudience = true,
-            //         ValidAudience = jwtTokenConfig.ValidAudience,
-            //         ValidIssuer = jwtTokenConfig.ValidIssuer,
-            //         RequireExpirationTime = true,
-            //         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthService.Secret))
-            //     };
-            // });
 
             services.AddSwaggerGen(c =>
             {
@@ -234,13 +215,15 @@ namespace ISoftViewerQCSystem
                 c.IncludeXmlComments(filePath);
             });
 
+            var allowedOrigins = Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
                 {
-                    policy.AllowAnyOrigin()
+                    policy.WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
-                        .AllowAnyHeader();
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
             });
         }

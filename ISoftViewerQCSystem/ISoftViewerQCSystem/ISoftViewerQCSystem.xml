@@ -304,6 +304,249 @@
                 根據Type取得Enable的DicomNode
             </summary>
         </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AssignmentController">
+            <summary>
+            Controller for user-role and role-function assignment operations.
+            Uses ILoginUserRoleService for string UserId (LoginUserData) and IRoleFunctionService.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.GetUserRoles(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Get all roles assigned to a user.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.AssignRoleToUser(System.String,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Assign a role to a user.
+            </summary>
+            <remarks>
+            This operation is idempotent - assigning an already assigned role returns success.
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.UnassignRoleFromUser(System.String,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Remove a role from a user.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.SyncRolesToUser(System.String,ISoftViewerQCSystem.Controllers.BulkAssignRequest,System.Threading.CancellationToken)">
+            <summary>
+            Sync multiple roles to a user in a single atomic operation.
+            </summary>
+            <remarks>
+            If any role assignment fails, all assignments are rolled back.
+            Already assigned roles are counted as successful (idempotent).
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.AssignRolesToUser(System.String,ISoftViewerQCSystem.Controllers.BulkAssignRequest,System.Threading.CancellationToken)">
+            <summary>
+            Assign multiple roles to a user in a single atomic operation.
+            </summary>
+            <remarks>
+            If any role assignment fails, all assignments are rolled back.
+            Already assigned roles are counted as successful (idempotent).
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.UnassignRolesFromUser(System.String,ISoftViewerQCSystem.Controllers.BulkAssignRequest,System.Threading.CancellationToken)">
+            <summary>
+            Remove multiple roles from a user in a single atomic operation.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.GetRoleUsers(System.Guid,System.String,System.Boolean,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get all users assigned to a role (paginated).
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.GetRoleFunctions(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Get all functions assigned to a role.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.AssignFunctionToRole(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Assign a function to a role.
+            </summary>
+            <remarks>
+            This operation is idempotent - assigning an already assigned function returns success.
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.UnassignFunctionFromRole(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Remove a function from a role.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.SyncFunctionsToRole(System.Guid,ISoftViewerQCSystem.Controllers.BulkAssignRequest,System.Threading.CancellationToken)">
+            <summary>
+            Assign multiple functions to a role in a single atomic operation.
+            </summary>
+            <remarks>
+            If any function assignment fails, all assignments are rolled back.
+            Already assigned functions are counted as successful (idempotent).
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.AssignFunctionsToRole(System.Guid,ISoftViewerQCSystem.Controllers.BulkAssignRequest,System.Threading.CancellationToken)">
+            <summary>
+            Assign multiple functions to a role in a single atomic operation.
+            </summary>
+            <remarks>
+            If any function assignment fails, all assignments are rolled back.
+            Already assigned functions are counted as successful (idempotent).
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.UnassignFunctionsFromRole(System.Guid,ISoftViewerQCSystem.Controllers.BulkAssignRequest,System.Threading.CancellationToken)">
+            <summary>
+            Remove multiple functions from a role in a single atomic operation.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AssignmentController.GetFunctionRoles(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Get all roles that have a specific function assigned.
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AuthController">
+            <summary>
+            認證控制器，處理登入、登出和 Token 刷新
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AuthController.Login(ISoftViewerQCSystem.Controllers.AuthLoginRequest)">
+            <summary>
+            使用者登入
+            </summary>
+            <param name="request">登入請求</param>
+            <returns>登入結果，包含 Token 和功能列表</returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AuthController.Refresh(ISoftViewerQCSystem.Controllers.AuthRefreshRequest)">
+            <summary>
+            使用 Refresh Token 刷新 Access Token
+            </summary>
+            <param name="request">刷新請求</param>
+            <returns>新的 Token</returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.AuthController.Logout(ISoftViewerQCSystem.Controllers.AuthLogoutRequest)">
+            <summary>
+            使用者登出
+            </summary>
+            <param name="request">登出請求（可選）</param>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AuthLoginRequest">
+            <summary>
+            登入請求
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginRequest.Username">
+            <summary>
+            使用者名稱
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginRequest.Password">
+            <summary>
+            密碼
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginRequest.RememberMe">
+            <summary>
+            是否記住我（延長 Refresh Token 有效期）
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AuthRefreshRequest">
+            <summary>
+            刷新 Token 請求
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthRefreshRequest.RefreshToken">
+            <summary>
+            Refresh Token
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AuthLogoutRequest">
+            <summary>
+            登出請求
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLogoutRequest.RefreshToken">
+            <summary>
+            Refresh Token（可選）
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLogoutRequest.LogoutFromAllDevices">
+            <summary>
+            是否從所有裝置登出
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AuthLoginResponse">
+            <summary>
+            登入回應
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.UserName">
+            <summary>
+            使用者名稱
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.FunctionList">
+            <summary>
+            功能列表
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.AccessToken">
+            <summary>
+            Access Token
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.RefreshToken">
+            <summary>
+            Refresh Token
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.ExpiresIn">
+            <summary>
+            Access Token 過期時間（秒）
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.RefreshExpiresIn">
+            <summary>
+            Refresh Token 過期時間（秒）
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginResponse.Roles">
+            <summary>
+            角色列表
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.AuthTokenResponse">
+            <summary>
+            Token 刷新回應
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthTokenResponse.UserName">
+            <summary>
+            使用者名稱
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthTokenResponse.FunctionList">
+            <summary>
+            功能列表
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthTokenResponse.AccessToken">
+            <summary>
+            Access Token
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthTokenResponse.RefreshToken">
+            <summary>
+            Refresh Token
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthTokenResponse.ExpiresIn">
+            <summary>
+            Access Token 過期時間（秒）
+            </summary>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.AuthTokenResponse.RefreshExpiresIn">
+            <summary>
+            Refresh Token 過期時間（秒）
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Controllers.AutoMappingController">
             <summary>
                 組態設定控制器
@@ -468,6 +711,47 @@
             <summary>
                 DICOM UnitOfWork
             </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.FunctionManagementController">
+            <summary>
+            Controller for function permission management CRUD operations.
+            Demonstrates how to use IFunctionManagementService.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.FunctionManagementController.CreateFunction(TeraLinkaAuth.Contracts.Management.CreateFunctionRequest,System.Threading.CancellationToken)">
+            <summary>
+            Create a new function permission.
+            </summary>
+            <remarks>
+            Function codes must be uppercase alphanumeric with underscores (e.g., "USER_READ", "REPORT_EXPORT").
+            Function codes are automatically normalized to uppercase.
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.FunctionManagementController.GetFunction(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Get a function by ID.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.FunctionManagementController.GetFunctions(System.String,System.String,System.Boolean,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get a paginated list of functions.
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.FunctionManagementController.UpdateFunction(System.Guid,TeraLinkaAuth.Contracts.Management.UpdateFunctionRequest,System.Threading.CancellationToken)">
+            <summary>
+            Update a function.
+            </summary>
+            <remarks>
+            Note: Function codes cannot be changed after creation.
+            </remarks>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.FunctionManagementController.DeleteFunction(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Delete a function.
+            </summary>
+            <remarks>
+            Functions with role assignments cannot be deleted. Remove all role assignments first.
+            </remarks>
         </member>
         <member name="T:ISoftViewerQCSystem.Controllers.ImageRendererController">
             <summary>
@@ -845,17 +1129,6 @@
             <param name="action"></param>
             <returns></returns>
         </member>
-        <member name="T:ISoftViewerQCSystem.Controllers.QCFuncController">
-            <summary>
-            功能名稱控制器
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.QCFuncController.Get">
-            <summary>
-            取得功能列表
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:ISoftViewerQCSystem.Controllers.QualityControlController">
             <summary>
                 組態設定控制器
@@ -869,57 +1142,46 @@
             <param name="imageTagModify">要修改的標籤信息</param>
             <returns>修改結果</returns>
         </member>
-        <member name="T:ISoftViewerQCSystem.Controllers.RoleController">
+        <member name="T:ISoftViewerQCSystem.Controllers.RoleManagementController">
             <summary>
-            角色控制器
+            Controller for role management CRUD operations.
+            Demonstrates how to use IRoleManagementService.
             </summary>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.Get">
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleManagementController.CreateRole(TeraLinkaAuth.Contracts.Management.CreateRoleRequest,System.Threading.CancellationToken)">
             <summary>
-                取得所有角色列表
+            Create a new role.
             </summary>
-            <returns></returns>
+            <remarks>
+            Role codes must be uppercase alphanumeric with underscores (e.g., "ADMIN", "USER_MANAGER").
+            Role codes are automatically normalized to uppercase.
+            </remarks>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.AddUser(ISoftViewerLibrary.Models.DTOs.UserRole)">
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleManagementController.GetRole(System.Guid,System.Threading.CancellationToken)">
             <summary>
-                新增角色列表
+            Get a role by ID.
             </summary>
-            <param name="data"></param>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.Post(ISoftViewerLibrary.Models.DTOs.UserRole,System.String)">
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleManagementController.GetRoles(System.String,System.Boolean,System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
-            修改角色列表
+            Get a paginated list of roles.
             </summary>
-            <param name="data"></param>
-            <param name="roleName"></param>
-            <returns></returns>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.Delete(System.String)">
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleManagementController.UpdateRole(System.Guid,TeraLinkaAuth.Contracts.Management.UpdateRoleRequest,System.Threading.CancellationToken)">
             <summary>
-                刪除角色列表
+            Update a role.
             </summary>
-            <param name="roleName"></param>
+            <remarks>
+            Note: Role codes cannot be changed after creation.
+            </remarks>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.AddQCFuction(System.String,System.String)">
+        <member name="M:ISoftViewerQCSystem.Controllers.RoleManagementController.DeleteRole(System.Guid,System.Threading.CancellationToken)">
             <summary>
-                增加指定Role QC function
+            Delete a role.
             </summary>
-            <param name="roleName"></param>
-            <param name="qcFunction"></param>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.DeleteQCFunction(System.String,System.String)">
-            <summary>
-            刪除指定Role QC function
-            </summary>
-            <param name="roleName"></param>
-            <param name="qcFunction"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.RoleController.GetRoleFuctionList(System.String)">
-            <summary>
-                取得指定Role QC function
-            </summary>
-            <param name="roleName"></param>
+            <remarks>
+            Roles with user assignments cannot be deleted. Remove all user assignments first.
+            </remarks>
         </member>
         <member name="T:ISoftViewerQCSystem.Controllers.SearchDcmServiceController">
             <summary>
@@ -1091,49 +1353,96 @@
         </member>
         <member name="T:ISoftViewerQCSystem.Controllers.UserAccountController">
             <summary>
-                使用者帳號控制器
+            使用者帳號管理控制器
+            使用 TeraLinkaAuth 的 ILoginUserManagementService 進行用戶管理
             </summary>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Login(ISoftViewerLibrary.Models.DTOs.LoginRequest)">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.GetUsers(System.String,System.Boolean,System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
-                使用者登入
+            取得所有帳號資訊 (分頁)
             </summary>
-            <param name="request"></param>
+            <param name="search">搜尋關鍵字</param>
+            <param name="includeInactive">是否包含停用帳號</param>
+            <param name="page">頁碼</param>
+            <param name="pageSize">每頁筆數</param>
+            <param name="cancellationToken">取消令牌</param>
+            <returns>使用者列表</returns>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Logout">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.GetUser(System.String,System.Threading.CancellationToken)">
             <summary>
-                使用者登出
+            取得單一帳號資訊
             </summary>
+            <param name="userId">使用者 ID</param>
+            <param name="cancellationToken">取消令牌</param>
+            <returns>使用者資訊</returns>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.RefreshToken(ISoftViewerLibrary.Models.DTOs.RefreshTokenRequest)">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.CreateUser(TeraLinkaAuth.Contracts.Management.CreateLoginUserRequest,System.Threading.CancellationToken)">
             <summary>
-                權杖重新取得
+            新增使用者帳號
             </summary>
-            <param name="request"></param>
+            <param name="request">使用者資料</param>
+            <param name="cancellationToken">取消令牌</param>
+            <returns>建立的使用者資訊</returns>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Get">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.UpdateUser(System.String,TeraLinkaAuth.Contracts.Management.UpdateLoginUserRequest,System.Threading.CancellationToken)">
             <summary>
-                取得所有帳號資訊
+            修改使用者帳號資訊
             </summary>
-            <returns></returns>
+            <param name="userId">使用者 ID</param>
+            <param name="request">使用者資料</param>
+            <param name="cancellationToken">取消令牌</param>
+            <returns>更新後的使用者資訊</returns>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.AddUser(ISoftViewerLibrary.Models.DTOs.LoginUserDataDto)">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.UpdatePassword(System.String,ISoftViewerQCSystem.Controllers.UpdatePasswordRequest,System.Threading.CancellationToken)">
             <summary>
-                新增使用者帳號資訊
+            修改使用者密碼
             </summary>
-            <param name="data"></param>
+            <param name="userId">使用者 ID</param>
+            <param name="request">密碼變更請求</param>
+            <param name="cancellationToken">取消令牌</param>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Post(ISoftViewerLibrary.Models.DTOs.LoginUserDataDto)">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.DeleteUser(System.String,System.Threading.CancellationToken)">
             <summary>
-                修改使用者帳號資訊
+            刪除單一帳號 (軟刪除，設定 IsActive = false)
             </summary>
-            <param name="data"></param>
+            <param name="userId">使用者 ID</param>
+            <param name="cancellationToken">取消令牌</param>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.Delete(System.String)">
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.RestoreUser(System.String,System.Threading.CancellationToken)">
             <summary>
-                刪除單一帳號
+            恢復已刪除的帳號
             </summary>
-            <param name="userId"></param>
+            <param name="userId">使用者 ID</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.GetCurrentUser(System.Threading.CancellationToken)">
+            <summary>
+            取得目前登入使用者的資訊
+            </summary>
+            <param name="cancellationToken">取消令牌</param>
+            <returns>目前使用者資訊</returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UserAccountController.UpdateMyPassword(ISoftViewerQCSystem.Controllers.UpdatePasswordRequest,System.Threading.CancellationToken)">
+            <summary>
+            目前使用者修改自己的密碼
+            </summary>
+            <param name="request">密碼變更請求</param>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Controllers.UpdatePasswordRequest">
+            <summary>
+            更新密碼請求
+            </summary>
+            <param name="NewPassword">新密碼 (至少 8 個字元)</param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.UpdatePasswordRequest.#ctor(System.String)">
+            <summary>
+            更新密碼請求
+            </summary>
+            <param name="NewPassword">新密碼 (至少 8 個字元)</param>
+        </member>
+        <member name="P:ISoftViewerQCSystem.Controllers.UpdatePasswordRequest.NewPassword">
+            <summary>新密碼 (至少 8 個字元)</summary>
         </member>
         <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.OnConnectedAsync">
             <summary>
@@ -1173,6 +1482,12 @@
         <member name="M:ISoftViewerQCSystem.Hubs.ChatHub.ViewPortSyncEvent(System.String,System.String,System.String,System.String)">
             <summary>
                 
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Hubs.UserIdProvider.UserIdProvider">
+            <summary>
+            SignalR 使用者 ID 提供者
+            使用 TeraLinkaAuth 的 Claims 擴展來獲取使用者 ID
             </summary>
         </member>
         <member name="T:ISoftViewerQCSystem.Interfaces.IHandleCommand">

@@ -6,6 +6,7 @@ using ISoftViewerLibrary.Applications.Interface;
 using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerQCSystem.Applications;
 using ISoftViewerQCSystem.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -19,6 +20,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class StudyMaintenanceController : ControllerBase, IHandleCommand
     {
         /// <summary>

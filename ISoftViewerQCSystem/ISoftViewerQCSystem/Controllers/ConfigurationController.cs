@@ -10,6 +10,7 @@ using ISoftViewerLibrary.Models.DTOs.PacsServer;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerQCSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,6 +22,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ConfigurationController : ControllerBase
     {
         private readonly IConfiguration _configuration;

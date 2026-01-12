@@ -10,6 +10,7 @@ using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
 using ISoftViewerLibrary.Utils;
 using ISoftViewerQCSystem.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,6 +22,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DicomDbQueryController : ControllerBase
     {
         private readonly DicomImageService _dicomImageService;
@@ -62,6 +64,7 @@ namespace ISoftViewerQCSystem.Controllers
             }
             catch (Exception e)
             {
+                Serilog.Log.Error(e, "GetPatientStudy error: {Message}", e.Message);
                 return BadRequest(e.Message);
             }
         }
@@ -160,8 +163,8 @@ namespace ISoftViewerQCSystem.Controllers
             {
                 new() { Name = "HttpFilePath" },
                 new() { Name = "SOPInstanceUID" },
-                new() { Name = "Annotations" },
-                new() { Name = "KeyImage", Type = FieldType.ftBoolean },
+                // new() { Name = "Annotations" },
+                // new() { Name = "KeyImage", Type = FieldType.ftBoolean },
                 new() { Name = "ImageNumber", Type = FieldType.ftInt, OrderType = OrderOperator.foASC },
             };
 

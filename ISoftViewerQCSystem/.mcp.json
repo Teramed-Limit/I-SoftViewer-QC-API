@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "mssql": {
+      "command": "cmd",
+      "args": ["/c", "uvx", "--from", "microsoft-sql-server-mcp", "mssql_mcp_server"],
+      "env": {
+        "MSSQL_SERVER": "DESKTOP-DSL3QH8\\MSSQLSERVER01",
+        "MSSQL_DATABASE": "TeraLinkaServer",
+        "MSSQL_USER": "sa",
+        "MSSQL_PASSWORD": "admin"
+      }
+    }
+  }
+}

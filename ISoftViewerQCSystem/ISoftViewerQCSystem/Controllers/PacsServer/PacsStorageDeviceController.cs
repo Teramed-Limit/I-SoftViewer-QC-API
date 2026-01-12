@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerLibrary.Models.DTOs.PacsServer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ISoftViewerQCSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PacsStorageDeviceController : ControllerBase
     {
         /// <summary>

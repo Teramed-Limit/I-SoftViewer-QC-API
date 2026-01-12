@@ -14,12 +14,6 @@ namespace ISoftViewerQCSystem.Mapper
     {
         public ServiceMappings(IConfiguration configuration)
         {
-            CreateMap<LoginUserData, LoginUserDataDto>()
-                .ForMember(d => d.RoleList, s => s.ConvertUsing(new StringToListConverter()));
-
-            CreateMap<LoginUserDataDto, LoginUserData>()
-                .ForMember(d => d.RoleList, s => s.MapFrom(x => string.Join(",", x.RoleList.ToArray())));
-
             CreateMap<HISPatientData, HISDataDto>()
                 .ForMember(d => d.NameEng, s => s.MapFrom(x => x.OtherName))
                 .ForMember(d => d.Dept, s => s.MapFrom(x => x.HISPatientEpisode.Dept))

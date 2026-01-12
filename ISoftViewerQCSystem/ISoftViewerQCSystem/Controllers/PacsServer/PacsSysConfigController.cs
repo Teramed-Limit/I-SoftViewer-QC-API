@@ -10,6 +10,7 @@ using ISoftViewerLibrary.Models.DTOs;
 using ISoftViewerLibrary.Models.DTOs.PacsServer;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerQCSystem.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using static ISoftViewerQCSystem.Applications.GeneralApplicationService;
 
@@ -17,6 +18,7 @@ namespace ISoftViewerQCSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PacsSysConfigController : ControllerBase, IHandleSearch2
     {
         /// <summary>

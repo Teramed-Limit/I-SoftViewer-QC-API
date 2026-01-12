@@ -1,191 +1,300 @@
-﻿using AutoMapper;
-using ISoftViewerLibrary.Models.DTOs;
-using ISoftViewerLibrary.Services.RepositoryService.Table;
-using ISoftViewerQCSystem.JWT;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using ISoftViewerQCSystem.Services;
-using ISoftViewerQCSystem.utils;
+using TeraLinkaAuth.Abstractions;
+using TeraLinkaAuth.Authorization;
+using TeraLinkaAuth.Contracts;
+using TeraLinkaAuth.Contracts.Management;
+using TeraLinkaAuth.Extensions;
+using TeraLinkaAuth.Management;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+namespace ISoftViewerQCSystem.Controllers;
 
-namespace ISoftViewerQCSystem.Controllers
+/// <summary>
+/// 使用者帳號管理控制器
+/// 使用 TeraLinkaAuth 的 ILoginUserManagementService 進行用戶管理
+/// </summary>
+[ApiController]
+[RequireFunction("ACCOUNT_MAINTAIN")]
+[Route("api/[controller]")]
+[Authorize]
+public class UserAccountController : ControllerBase
 {
-    /// <summary>
-    ///     使用者帳號控制器
-    /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    public class UserAccountController : ControllerBase
+    private readonly ILoginUserManagementService _userManagementService;
+
+    public UserAccountController(ILoginUserManagementService userManagementService)
     {
-        private readonly IConfiguration _configuration;
-        private readonly IMapper _mapper;
-        private readonly UserAccountService _userService;
-        private readonly AuthService _authService;
-        private readonly UserRoleService _userRoleService;
+        _userManagementService = userManagementService;
+    }
 
-        public UserAccountController(
-            UserAccountService userService,
-            UserRoleService userRoleService,
-            IConfiguration configuration,
-            IMapper mapper)
+    /// <summary>
+    /// 取得所有帳號資訊 (分頁)
+    /// </summary>
+    /// <param name="search">搜尋關鍵字</param>
+    /// <param name="includeInactive">是否包含停用帳號</param>
+    /// <param name="page">頁碼</param>
+    /// <param name="pageSize">每頁筆數</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>使用者列表</returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(PagedResult<LoginUserDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetUsers(
+        [FromQuery] string? search = null,
+        [FromQuery] bool includeInactive = false,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var options = new LoginUserQueryOptions
         {
-            _userService = userService;
-            _userRoleService = userRoleService;
-            _configuration = configuration;
-            _mapper = mapper;
+            SearchTerm = search,
+            IncludeInactive = includeInactive,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        var result = await _userManagementService.GetListAsync(options, cancellationToken);
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// 取得單一帳號資訊
+    /// </summary>
+    /// <param name="userId">使用者 ID</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>使用者資訊</returns>
+    [HttpGet("{userId}")]
+    [ProducesResponseType(typeof(LoginUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetUser(string userId, CancellationToken cancellationToken)
+    {
+        var result = await _userManagementService.GetByIdAsync(userId, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return NotFound(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
+        return Ok(result.Value);
+    }
 
-        /// <summary>
-        ///     使用者登入
-        /// </summary>
-        /// <param name="request"></param>
-        [AllowAnonymous]
-        [HttpPost("login")]
-        public ActionResult Login([FromBody] LoginRequest request)
+    /// <summary>
+    /// 新增使用者帳號
+    /// </summary>
+    /// <param name="request">使用者資料</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>建立的使用者資訊</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(LoginUserDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> CreateUser([FromBody] CreateLoginUserRequest request, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var clientInfo = GetClientInfo();
+        var result = await _userManagementService.CreateAsync(request, currentUserId, clientInfo, cancellationToken);
+
+        if (!result.IsSuccess)
         {
-            if (!ModelState.IsValid) return BadRequest();
-
-            // DB validation
-            var loginUser = _userService.IsAnExistingUser(request.UserName);
-            if (loginUser == null)
-                return Unauthorized("Unrecognized user, please contact administrator for more information.");
-
-            var functionList = loginUser.UserID == "admin"
-                ? _userRoleService.GetAllFunctionList()
-                : _userRoleService.GetRoleFunctionList(loginUser);
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, request.UserName)
-                // new Claim(ClaimTypes.Role, role)
-            };
-
-            return Ok(new LoginResult
-            {
-                UserName = request.UserName,
-                FunctionList = functionList.ToList(),
-                AccessToken = _authService.GenerateJwtToken(request.UserName),
-                RefreshToken = _userService.GenerateRefreshToken(request.UserName),
-            });
+            return BadRequest(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
-        /// <summary>
-        ///     使用者登出
-        /// </summary>
-        [HttpPost("logout")]
-        public ActionResult Logout()
-        {
-            // optionally "revoke" JWT token on the server side --> add the current token to a block-list
-            // https://github.com/auth0/node-jsonwebtoken/issues/375
+        return CreatedAtAction(nameof(GetUser), new { userId = result.Value!.UserId }, result.Value);
+    }
 
-            var userName = User.Identity?.Name;
-            _userService.ClearRefreshToken(userName);
-            return Ok();
+    /// <summary>
+    /// 修改使用者帳號資訊
+    /// </summary>
+    /// <param name="userId">使用者 ID</param>
+    /// <param name="request">使用者資料</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>更新後的使用者資訊</returns>
+    [HttpPut("{userId}")]
+    [ProducesResponseType(typeof(LoginUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateLoginUserRequest request, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var clientInfo = GetClientInfo();
+        var result = await _userManagementService.UpdateAsync(userId, request, currentUserId, clientInfo, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            return result.ErrorCode == "AUTH_LOGIN_101"
+                ? NotFound(new ErrorResponse(result.ErrorCode, result.ErrorMessage))
+                : BadRequest(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
-        /// <summary>
-        ///     權杖重新取得
-        /// </summary>
-        /// <param name="request"></param>
-        [HttpPost("refreshtoken")]
-        public async Task<ActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// 修改使用者密碼
+    /// </summary>
+    /// <param name="userId">使用者 ID</param>
+    /// <param name="request">密碼變更請求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    [HttpPut("{userId}/password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> UpdatePassword(string userId, [FromBody] UpdatePasswordRequest request, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var clientInfo = GetClientInfo();
+        var result = await _userManagementService.UpdatePasswordAsync(userId, request.NewPassword, currentUserId, clientInfo, cancellationToken);
+
+        if (!result.IsSuccess)
         {
-            try
-            {
-                var userName = User.Identity?.Name;
-
-                // 驗證輸入的刷新令牌
-                var isValidRefreshToken = _userService.ValidateRefreshTokenAsync(userName, request.RefreshToken);
-
-                if (!isValidRefreshToken)
-                {
-                    return BadRequest("Invalid refresh token");
-                }
-
-                var refreshUser = _userService.GetUserData(userName);
-
-                var functionList = refreshUser.UserID == "admin"
-                    ? _userRoleService.GetAllFunctionList()
-                    : _userRoleService.GetRoleFunctionList(refreshUser);
-
-                return Ok(new LoginResult
-                {
-                    UserName = userName,
-                    FunctionList = functionList.ToList(),
-                    AccessToken = _authService.GenerateJwtToken(userName),
-                    RefreshToken = _userService.GenerateRefreshToken(userName),
-                });
-            }
-            catch (SecurityTokenException e)
-            {
-                return
-                    Unauthorized(e.Message); // return 401 so that the client side can redirect the user to login page
-            }
+            return result.ErrorCode == "AUTH_LOGIN_101"
+                ? NotFound(new ErrorResponse(result.ErrorCode, result.ErrorMessage))
+                : BadRequest(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
-        /// <summary>
-        ///     取得所有帳號資訊
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public ActionResult<IEnumerable<LoginUserDataDto>> Get()
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 刪除單一帳號 (軟刪除，設定 IsActive = false)
+    /// </summary>
+    /// <param name="userId">使用者 ID</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    [HttpDelete("{userId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeleteUser(string userId, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var clientInfo = GetClientInfo();
+        var result = await _userManagementService.DeleteAsync(userId, currentUserId, clientInfo, cancellationToken);
+
+        if (!result.IsSuccess)
         {
-            var userList = _userService.GetAll();
-            var userDto = _mapper.Map<IEnumerable<LoginUserDataDto>>(userList);
-            return Ok(userDto);
+            return result.ErrorCode == "AUTH_LOGIN_101"
+                ? NotFound(new ErrorResponse(result.ErrorCode, result.ErrorMessage))
+                : BadRequest(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
-        /// <summary>
-        ///     新增使用者帳號資訊
-        /// </summary>
-        /// <param name="data"></param>
-        [HttpPost("userId")]
-        public ActionResult AddUser([FromBody] LoginUserDataDto data)
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 恢復已刪除的帳號
+    /// </summary>
+    /// <param name="userId">使用者 ID</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    [HttpPost("{userId}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> RestoreUser(string userId, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var clientInfo = GetClientInfo();
+        var result = await _userManagementService.RestoreAsync(userId, currentUserId, clientInfo, cancellationToken);
+
+        if (!result.IsSuccess)
         {
-            if (_userService.IsAnExistingUser(data.UserID) != null)
-                return BadRequest("Existing user, changing user id.");
-
-            var userList = _mapper.Map<LoginUserData>(data);
-
-            var identityName = User.Identity?.Name;
-            _userService.GenerateNewTransaction();
-            if (!_userService.AddOrUpdate(userList, identityName)) return BadRequest();
-            return Ok();
+            return result.ErrorCode == "AUTH_LOGIN_101"
+                ? NotFound(new ErrorResponse(result.ErrorCode, result.ErrorMessage))
+                : BadRequest(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
-        /// <summary>
-        ///     修改使用者帳號資訊
-        /// </summary>
-        /// <param name="data"></param>
-        [HttpPost("userId/{userId}")]
-        public ActionResult Post([FromBody] LoginUserDataDto data)
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 取得目前登入使用者的資訊
+    /// </summary>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>目前使用者資訊</returns>
+    [HttpGet("me")]
+    [SkipFunctionAuthorization]
+    [ProducesResponseType(typeof(LoginUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var result = await _userManagementService.GetByIdAsync(currentUserId, cancellationToken);
+
+        if (!result.IsSuccess)
         {
-            var identityName = User.Identity?.Name;
-            var userList = _mapper.Map<LoginUserData>(data);
-            if (!_userService.AddOrUpdate(userList, identityName)) return BadRequest();
-            return Ok();
+            return NotFound(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
 
-        /// <summary>
-        ///     刪除單一帳號
-        /// </summary>
-        /// <param name="userId"></param>
-        [HttpDelete("userId/{userId}")]
-        public ActionResult Delete(string userId)
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// 目前使用者修改自己的密碼
+    /// </summary>
+    /// <param name="request">密碼變更請求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    [HttpPut("me/password")]
+    [SkipFunctionAuthorization]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdateMyPassword([FromBody] UpdatePasswordRequest request, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized();
+
+        var clientInfo = GetClientInfo();
+        var result = await _userManagementService.UpdatePasswordAsync(currentUserId, request.NewPassword, currentUserId, clientInfo, cancellationToken);
+
+        if (!result.IsSuccess)
         {
-            if (!_userService.Delete(userId)) return BadRequest();
-            return Ok();
+            return BadRequest(new ErrorResponse(result.ErrorCode!, result.ErrorMessage));
         }
+
+        return NoContent();
+    }
+
+    private ClientInfo GetClientInfo()
+    {
+        return new ClientInfo
+        {
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers.UserAgent.ToString()
+        };
     }
 }
+
+/// <summary>
+/// 更新密碼請求
+/// </summary>
+/// <param name="NewPassword">新密碼 (至少 8 個字元)</param>
+public record UpdatePasswordRequest(string NewPassword);
