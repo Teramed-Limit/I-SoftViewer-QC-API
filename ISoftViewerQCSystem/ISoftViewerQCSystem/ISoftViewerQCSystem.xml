@@ -1580,21 +1580,104 @@
         </member>
         <member name="T:ISoftViewerQCSystem.Program">
             <summary>
-            
+            應用程式進入點
             </summary>
         </member>
         <member name="M:ISoftViewerQCSystem.Program.Main(System.String[])">
             <summary>
-            
+            主程式進入點
             </summary>
             <param name="args"></param>
         </member>
         <member name="M:ISoftViewerQCSystem.Program.CreateHostBuilder(System.String[])">
             <summary>
-            
+            建立應用程式主機
             </summary>
             <param name="args"></param>
             <returns></returns>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.AutoEncryptionService">
+            <summary>
+            自動加密服務 - 在非開發環境啟動時自動加密敏感配置
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Services.AutoEncryptionService.SensitiveKeyNames">
+            <summary>
+            敏感 key 名稱清單（不區分大小寫）
+            遇到這些 key 名稱時會自動加密其值
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.AutoEncryptionService.EnsureConfigurationEncrypted(Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>
+            確保配置已加密（非 Development 環境）
+            </summary>
+            <param name="env">主機環境</param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.AutoEncryptionService.EncryptSecretsFile(System.String,System.String)">
+            <summary>
+            加密 Secrets 檔案並輸出至 Encrypted 檔案
+            遞迴處理整個 JSON，遇到敏感 key 就加密，其餘原樣保留
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.AutoEncryptionService.ProcessJsonObject(System.Text.Json.Nodes.JsonObject,System.String)">
+            <summary>
+            遞迴處理 JSON 物件，加密敏感欄位
+            </summary>
+            <param name="jsonObject">要處理的 JSON 物件</param>
+            <param name="currentPath">當前路徑（用於日誌）</param>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.AutoEncryptionService.ProcessJsonArray(System.Text.Json.Nodes.JsonArray,System.String)">
+            <summary>
+            遞迴處理 JSON 陣列
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.AutoEncryptionService.IsSensitiveKey(System.String)">
+            <summary>
+            判斷 key 名稱是否為敏感欄位
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.DecryptedConfigurationProvider">
+            <summary>
+            解密配置提供者 - 自動解密 DPAPI 加密的配置值
+            使用遞迴掃描方式，根據 key 名稱判斷是否為敏感欄位
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Services.DecryptedConfigurationProvider.SensitiveKeyNames">
+            <summary>
+            敏感 key 名稱清單（不區分大小寫）
+            與 AutoEncryptionService 保持一致
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DecryptedConfigurationProvider.ScanAndDecrypt(System.Collections.Generic.IEnumerable{Microsoft.Extensions.Configuration.IConfigurationSection},System.String)">
+            <summary>
+            遞迴掃描配置並解密敏感欄位
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DecryptedConfigurationProvider.IsSensitiveKey(System.String)">
+            <summary>
+            判斷 key 名稱是否為敏感欄位
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.DecryptedConfigurationSource">
+            <summary>
+            解密配置來源
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.DecryptedConfigurationExtensions">
+            <summary>
+            配置建構器擴充方法
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DecryptedConfigurationExtensions.AddDecryptedConfiguration(Microsoft.Extensions.Configuration.IConfigurationBuilder)">
+            <summary>
+            添加 DPAPI 解密支援
+            自動掃描所有配置，根據 key 名稱判斷是否需要解密
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DecryptedConfigurationExtensions.HasAnyEncryptedValue(System.Collections.Generic.IEnumerable{Microsoft.Extensions.Configuration.IConfigurationSection})">
+            <summary>
+            遞迴檢查是否有任何加密值
+            </summary>
         </member>
         <member name="T:ISoftViewerQCSystem.Services.DicomTagService">
             <summary>
@@ -1619,6 +1702,31 @@
         <member name="M:ISoftViewerQCSystem.Services.DicomTagService.ModifyTags(System.String,System.String,System.String,System.Collections.Generic.List{ISoftViewerLibrary.Models.DTOs.ModifyDicomTagData},ISoftViewerLibrary.Models.DTOs.DicomOperationNodes,System.Boolean)">
             <summary>
                 批量修改多個 Tags
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.SecureConfigurationService">
+            <summary>
+            安全配置服務 - 使用 DPAPI 加密/解密敏感配置
+            DPAPI 加密的資料只能在同一台機器上解密
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.SecureConfigurationService.Encrypt(System.String)">
+            <summary>
+            加密字串（使用 DPAPI - 僅限當前機器）
+            </summary>
+            <param name="plainText">明文</param>
+            <returns>Base64 編碼的加密字串</returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.SecureConfigurationService.Decrypt(System.String)">
+            <summary>
+            解密字串（使用 DPAPI）
+            </summary>
+            <param name="encryptedText">加密的字串（含 ENCRYPTED: 前綴）</param>
+            <returns>明文</returns>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.SecureConfigurationService.IsEncrypted(System.String)">
+            <summary>
+            檢查值是否已加密
             </summary>
         </member>
         <member name="T:ISoftViewerQCSystem.Startup">

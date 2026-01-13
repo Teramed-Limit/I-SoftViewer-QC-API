@@ -12,3 +12,12 @@ obj/
 tmpCmd.bat
 
 I-SoftViewer-PMS-API/Properties/PublishProfiles/
+
+# Sensitive configuration files (DO NOT COMMIT)
+**/appsettings.Secrets.json
+**/appsettings.Encrypted.json
+**/appsettings.Local.json
+**/appsettings.Production.json
+
+# User secrets
+secrets.json

@@ -7,5 +7,9 @@
       "Bash(dotnet-CycloneDX:*)",
       "Bash(osv-scanner:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "mssql"
+  ],
+  "enableAllProjectMcpServers": true
 }
