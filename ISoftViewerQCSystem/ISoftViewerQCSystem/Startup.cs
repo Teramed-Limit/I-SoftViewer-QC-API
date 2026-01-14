@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.RateLimiting;
 using System.Xml.Serialization;
 using AutoMapper;
 using ISoftViewerLibrary.Applications.Interface;
@@ -216,15 +217,52 @@ namespace ISoftViewerQCSystem
             });
 
             var allowedOrigins = Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+            // L001 修復：更明確的 CORS 策略名稱
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", policy =>
+                options.AddPolicy("ProductionCors", policy =>
                 {
                     policy.WithOrigins(allowedOrigins)
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .WithHeaders("Authorization", "Content-Type", "Accept", "X-Requested-With")
                         .AllowCredentials();
                 });
+            });
+
+            // M003 修復：添加 Rate Limiting 防止暴力破解和 DoS 攻擊
+            services.AddRateLimiter(options =>
+            {
+                // 全域速率限制：每分鐘 100 個請求
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 10
+                        }));
+
+                // 登入端點更嚴格的限制：每分鐘 5 次
+                options.AddPolicy("AuthPolicy", context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 2
+                        }));
+
+                options.OnRejected = async (context, token) =>
+                {
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    context.HttpContext.Response.ContentType = "application/json";
+                    await context.HttpContext.Response.WriteAsync(
+                        "{\"error\":\"Too many requests. Please try again later.\"}", token);
+                };
             });
         }
 
@@ -236,12 +274,53 @@ namespace ISoftViewerQCSystem
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // M005 修復：全域異常處理（最早執行，攔截所有未處理的異常）
+            app.UseGlobalExceptionHandler();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "I-SoftViewer-QCSystem v1"));
             }
+            else
+            {
+                // 生產環境啟用 HSTS
+                app.UseHsts();
+            }
+
+            // Security Headers - 防止 XSS、Clickjacking、MIME-sniffing 等攻擊 (H003)
+            app.Use(async (context, next) =>
+            {
+                // 防止 MIME 類型嗅探
+                context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+
+                // 防止點擊劫持
+                context.Response.Headers.Append("X-Frame-Options", "DENY");
+
+                // XSS 保護（雖然現代瀏覽器已棄用，但仍建議設置）
+                context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+
+                // 控制 Referrer 資訊洩露
+                context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+
+                // Content Security Policy - 限制資源載入來源
+                context.Response.Headers.Append("Content-Security-Policy",
+                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; frame-ancestors 'none'");
+
+                // 權限策略 - 限制瀏覽器功能
+                context.Response.Headers.Append("Permissions-Policy",
+                    "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()");
+
+                // 移除伺服器資訊標頭（減少資訊洩露）
+                context.Response.Headers.Remove("Server");
+                context.Response.Headers.Remove("X-Powered-By");
+
+                await next();
+            });
+
+            // HTTPS 重導向移到較早位置 (M006)
+            app.UseHttpsRedirection();
 
             app.UseDefaultFiles();
 
@@ -251,9 +330,11 @@ namespace ISoftViewerQCSystem
 
             app.UseRouting();
 
-            app.UseCors("AllowAll");
+            // L001 修復：使用更明確的 CORS 策略名稱
+            app.UseCors("ProductionCors");
 
-            app.UseHttpsRedirection();
+            // M003 修復：啟用 Rate Limiting
+            app.UseRateLimiter();
 
             if (env.IsDevelopment())
             {
@@ -266,8 +347,9 @@ namespace ISoftViewerQCSystem
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers().RequireCors("AllowAll");
-                // endpoints.MapHub<ChatHub>("/hubs/chat").RequireCors("AllowAll");
+                // L001 修復：使用更明確的 CORS 策略名稱
+                endpoints.MapControllers().RequireCors("ProductionCors");
+                // endpoints.MapHub<ChatHub>("/hubs/chat").RequireCors("ProductionCors");
             });
             
             // 這裡改用 MapWhen 攔截 /api 路徑，檢查是否匹配 Endpoint

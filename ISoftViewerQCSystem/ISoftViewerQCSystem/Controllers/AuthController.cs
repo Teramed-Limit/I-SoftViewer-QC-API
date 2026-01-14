@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using ISoftViewerLibrary.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using TeraLinkaAuth.Abstractions;
 using TeraLinkaAuth.Authentication;
 using TeraLinkaAuth.Contracts;
@@ -37,6 +39,7 @@ public class AuthController : ControllerBase
     /// <returns>登入結果，包含 Token 和功能列表</returns>
     [AllowAnonymous]
     [HttpPost("login")]
+    [EnableRateLimiting("AuthPolicy")] // M003 修復：登入端點啟用嚴格的 Rate Limiting
     [ProducesResponseType(typeof(AuthLoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] AuthLoginRequest request)
@@ -153,18 +156,23 @@ public class AuthController : ControllerBase
 #region Request DTOs
 
 /// <summary>
-/// 登入請求
+/// 登入請求 (M001 修復：添加 Input Validation)
 /// </summary>
 public class AuthLoginRequest
 {
     /// <summary>
     /// 使用者名稱
     /// </summary>
+    [Required(ErrorMessage = "使用者名稱為必填")]
+    [StringLength(50, MinimumLength = 1, ErrorMessage = "使用者名稱長度必須在 1-50 字元之間")]
+    [RegularExpression(@"^[a-zA-Z0-9_\-\.@]+$", ErrorMessage = "使用者名稱只能包含字母、數字、底線、連字號、點和@符號")]
     public string Username { get; set; } = string.Empty;
 
     /// <summary>
     /// 密碼
     /// </summary>
+    [Required(ErrorMessage = "密碼為必填")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "密碼長度必須在 1-100 字元之間")]
     public string Password { get; set; } = string.Empty;
 
     /// <summary>
@@ -174,13 +182,15 @@ public class AuthLoginRequest
 }
 
 /// <summary>
-/// 刷新 Token 請求
+/// 刷新 Token 請求 (M001 修復：添加 Input Validation)
 /// </summary>
 public class AuthRefreshRequest
 {
     /// <summary>
     /// Refresh Token
     /// </summary>
+    [Required(ErrorMessage = "Refresh Token 為必填")]
+    [StringLength(500, MinimumLength = 10, ErrorMessage = "Token 格式不正確")]
     public string RefreshToken { get; set; } = string.Empty;
 }
 

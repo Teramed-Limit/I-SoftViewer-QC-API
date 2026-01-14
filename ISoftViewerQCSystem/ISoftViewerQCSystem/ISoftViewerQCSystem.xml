@@ -429,7 +429,7 @@
         </member>
         <member name="T:ISoftViewerQCSystem.Controllers.AuthLoginRequest">
             <summary>
-            登入請求
+            登入請求 (M001 修復：添加 Input Validation)
             </summary>
         </member>
         <member name="P:ISoftViewerQCSystem.Controllers.AuthLoginRequest.Username">
@@ -449,7 +449,7 @@
         </member>
         <member name="T:ISoftViewerQCSystem.Controllers.AuthRefreshRequest">
             <summary>
-            刷新 Token 請求
+            刷新 Token 請求 (M001 修復：添加 Input Validation)
             </summary>
         </member>
         <member name="P:ISoftViewerQCSystem.Controllers.AuthRefreshRequest.RefreshToken">
@@ -922,6 +922,11 @@
             取得Log的型態
             </summary>
             <returns></returns>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.PacsLogController.AllowedLogTypes">
+            <summary>
+            允許的 Log 類型白名單 (H004 修復)
+            </summary>
         </member>
         <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetPacsLog(System.String,System.String,System.String)">
             <summary>
@@ -1536,6 +1541,17 @@
         <member name="T:ISoftViewerQCSystem.Interfaces.IQCOperationLoggerStrategy">
             <summary>
                 QC操作紀錄
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Middleware.GlobalExceptionHandlerMiddleware">
+            <summary>
+            全域異常處理中介軟體 (M005 修復)
+            攔截未處理的異常，記錄詳細資訊，但只返回安全的錯誤訊息給用戶端
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Middleware.GlobalExceptionHandlerMiddlewareExtensions">
+            <summary>
+            中介軟體擴充方法
             </summary>
         </member>
         <member name="T:ISoftViewerQCSystem.Models.BatchModifyDicomTagData">
