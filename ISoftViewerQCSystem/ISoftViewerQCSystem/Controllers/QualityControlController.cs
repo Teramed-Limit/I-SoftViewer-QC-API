@@ -17,6 +17,7 @@ using Dicom;
 using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using TeraLinkaAuth.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 // {
@@ -31,6 +32,7 @@ namespace ISoftViewerQCSystem.Controllers
     ///     組態設定控制器
     /// </summary>
     [Route("api/[controller]")]
+    [RequireFunction("QC_OPERATION")]
     [ApiController]
     [Authorize]
     public class QualityControlController : ControllerBase

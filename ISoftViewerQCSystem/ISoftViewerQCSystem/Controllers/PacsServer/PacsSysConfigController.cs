@@ -13,10 +13,12 @@ using ISoftViewerQCSystem.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using static ISoftViewerQCSystem.Applications.GeneralApplicationService;
+using TeraLinkaAuth.Authorization;
 
 namespace ISoftViewerQCSystem.Controllers
 {
     [Route("api/[controller]")]
+    [RequireFunction("SETTINGS")]
     [ApiController]
     [Authorize]
     public class PacsSysConfigController : ControllerBase, IHandleSearch2

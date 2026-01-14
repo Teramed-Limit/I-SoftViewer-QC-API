@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using TeraLinkaAuth.Authorization;
 
 namespace ISoftViewerQCSystem.Controllers
 {
@@ -16,6 +17,7 @@ namespace ISoftViewerQCSystem.Controllers
     /// DicomServiceProvider控制器
     /// </summary>
     [Route("api/[controller]")]
+    [RequireFunction("SETTINGS")]
     [ApiController]
     [Authorize]
     public class PacsServiceProviderController : ControllerBase

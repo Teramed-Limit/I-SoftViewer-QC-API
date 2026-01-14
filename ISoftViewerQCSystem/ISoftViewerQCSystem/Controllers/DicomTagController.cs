@@ -11,6 +11,7 @@ using ISoftViewerQCSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using TeraLinkaAuth.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,6 +21,7 @@ namespace ISoftViewerQCSystem.Controllers
     ///     DB Dicom Query
     /// </summary>
     [Route("api/[controller]")]
+    [RequireFunction("QC_OPERATION")]
     [ApiController]
     [Authorize]
     public class DicomTagController : ControllerBase

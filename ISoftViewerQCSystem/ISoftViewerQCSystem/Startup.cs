@@ -304,9 +304,20 @@ namespace ISoftViewerQCSystem
                 // 控制 Referrer 資訊洩露
                 context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
 
-                // Content Security Policy - 限制資源載入來源
+                // Content Security Policy - 通用安全策略（適用於現代 Web 應用）
                 context.Response.Headers.Append("Content-Security-Policy",
-                    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; frame-ancestors 'none'");
+                    "default-src 'self' https:; " +                    // 預設允許 HTTPS 資源
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +  // 腳本（React 需要）
+                    "style-src 'self' 'unsafe-inline' https:; " +     // 樣式（含外部 CSS）
+                    "img-src 'self' data: blob: https:; " +           // 圖片
+                    "font-src 'self' data: https:; " +                // 字型
+                    "connect-src 'self' https: wss:; " +              // API 和 WebSocket
+                    "worker-src 'self' blob:; " +                     // Web Workers
+                    "media-src 'self' https:; " +                     // 影音資源
+                    "object-src 'none'; " +                           // 禁止 Flash/插件
+                    "frame-ancestors 'none'; " +                      // 防止被嵌入 iframe
+                    "base-uri 'self'; " +                             // 限制 base URL
+                    "form-action 'self'");                            // 限制表單提交目標
 
                 // 權限策略 - 限制瀏覽器功能
                 context.Response.Headers.Append("Permissions-Policy",

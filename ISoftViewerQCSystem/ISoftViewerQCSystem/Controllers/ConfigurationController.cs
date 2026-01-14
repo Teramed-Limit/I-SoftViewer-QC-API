@@ -12,6 +12,7 @@ using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerQCSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
+using TeraLinkaAuth.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +22,7 @@ namespace ISoftViewerQCSystem.Controllers
     ///     組態設定控制器
     /// </summary>
     [Route("api/[controller]")]
+    [RequireFunction("SETTINGS")]
     [ApiController]
     [Authorize]
     public class ConfigurationController : ControllerBase
