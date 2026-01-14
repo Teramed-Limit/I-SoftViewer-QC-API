@@ -226,7 +226,7 @@ namespace ISoftViewerQCSystem.Services
                         foreach (var tag in modifyTags)
                         {
                             var dicomTag = new DicomTag(tag.Group, tag.Element);
-                            var oriValue = dataset.GetString(dicomTag);
+                            var oriValue = dataset.GetSingleValueOrDefault(dicomTag, "");
                             var dicomDictionary = dicomTag.DictionaryEntry;
                             modificationRecords.Add((oriValue, tag.Value, dicomDictionary));
                         }
@@ -256,7 +256,7 @@ namespace ISoftViewerQCSystem.Services
                 }
 
                 // 處理 PatientId 變更（如果有）
-                var patientIdRecord = modificationRecords.FirstOrDefault(r => 
+                var patientIdRecord = modificationRecords.FirstOrDefault(r =>
                     r.dictionary.Tag.ToString() == "(0010,0020)" && r.oriValue != r.newValue);
                 if (patientIdRecord != default)
                 {
@@ -340,12 +340,12 @@ namespace ISoftViewerQCSystem.Services
 
         // 記錄批量標籤修改操作
         private void RecordingBatchTagOperation(
-            string type, 
-            List<(string oriValue, string newValue, DicomDictionaryEntry dictionary)> modificationRecords, 
-            string studyInsUid, 
+            string type,
+            List<(string oriValue, string newValue, DicomDictionaryEntry dictionary)> modificationRecords,
+            string studyInsUid,
             string userName)
         {
-            var modifications = string.Join("; ", modificationRecords.Select(r => 
+            var modifications = string.Join("; ", modificationRecords.Select(r =>
                 $"modify {r.dictionary.Keyword}{r.dictionary.Tag} from '{r.oriValue}' to '{r.newValue}'"));
 
             var desc = type switch

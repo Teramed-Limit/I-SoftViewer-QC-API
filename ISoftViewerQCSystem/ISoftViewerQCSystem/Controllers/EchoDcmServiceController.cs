@@ -39,7 +39,7 @@ namespace ISoftViewerQCSystem.Controllers
         ///     查詢資料庫並Echo到指定Server AE Title
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CEcho([FromBody] DicomOperationNodes node)
+        public async Task<IActionResult> CEcho([FromBody] DicomEchoRequest node)
         {
             // CStore request
             _netUnitOfWork.RegisterRepository(_dcmRepository);

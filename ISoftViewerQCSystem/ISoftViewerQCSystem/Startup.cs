@@ -21,6 +21,7 @@ using ISoftViewerLibrary.Services.RepositoryService;
 using ISoftViewerLibrary.Services.RepositoryService.Interface;
 using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
+using ISoftViewerLibrary.Services.SchemaMigration;
 using ISoftViewerQCSystem.Applications;
 using ISoftViewerQCSystem.Hubs;
 using ISoftViewerQCSystem.Hubs.Services;
@@ -177,6 +178,10 @@ namespace ISoftViewerQCSystem
             services.AddScoped<StaticOptionsService>();
             services.AddScoped<QCAutoMappingConfigService>();
 
+            // Schema Migration 服務註冊
+            services.AddSingleton<ISchemaProvider, DatabaseSchemaProvider>();
+            services.AddHostedService<SchemaMigrationHostedService>();
+
             // services.AddAutoMapper(typeof(Startup));
             services.AddSingleton(provider => new MapperConfiguration(cfg =>
             {
@@ -244,16 +249,17 @@ namespace ISoftViewerQCSystem
                             QueueLimit = 10
                         }));
 
-                // 登入端點更嚴格的限制：每分鐘 5 次
+                // 登入端點更嚴格的限制：每分鐘 10 次
+                // QueueLimit = 0 確保超過限制時立即返回 429，而不是排隊等待
                 options.AddPolicy("AuthPolicy", context =>
                     RateLimitPartition.GetFixedWindowLimiter(
                         context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
                         _ => new FixedWindowRateLimiterOptions
                         {
-                            PermitLimit = 5,
+                            PermitLimit = 10,
                             Window = TimeSpan.FromMinutes(1),
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                            QueueLimit = 2
+                            QueueLimit = 0
                         }));
 
                 options.OnRejected = async (context, token) =>

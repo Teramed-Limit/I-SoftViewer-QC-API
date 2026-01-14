@@ -42,12 +42,12 @@ namespace ISoftViewerLibrary.Models.DTOs
         /// <summary>
         /// Gets or sets the creation date and time.
         /// </summary>
-        public string CreateDateTime { get; set; }
+        public string? CreateDateTime { get; set; }
 
         /// <summary>
         /// Gets or sets the user who created this record.
         /// </summary>
-        public string CreateUser { get; set; }
+        public string? CreateUser { get; set; }
 
         /// <summary>
         /// Gets or sets the last modified date and time.
@@ -57,7 +57,7 @@ namespace ISoftViewerLibrary.Models.DTOs
         /// <summary>
         /// Gets or sets the user who last modified this record.
         /// </summary>
-        public string ModifiedUser { get; set; }
+        public string? ModifiedUser { get; set; }
     }
 
     public class QCAutoMappingConfigDto

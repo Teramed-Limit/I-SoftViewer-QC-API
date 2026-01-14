@@ -697,7 +697,7 @@
                 建構
             </summary>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.EchoDcmServiceController.CEcho(ISoftViewerLibrary.Models.DTOs.DicomOperationNodes)">
+        <member name="M:ISoftViewerQCSystem.Controllers.EchoDcmServiceController.CEcho(ISoftViewerLibrary.Models.DTOs.DicomEchoRequest)">
             <summary>
                 查詢資料庫並Echo到指定Server AE Title
             </summary>
@@ -767,183 +767,6 @@
             <summary>
                 Get jpg image
             </summary>
-        </member>
-        <member name="T:ISoftViewerQCSystem.Controllers.LogController">
-            <summary>
-                記錄日誌控制器
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.LogController.GetStudyOperationLog(System.String)">
-            <summary>
-                取得檢查對應的記錄日誌
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.LogController.GetStudyByUserOperateBefore(System.String)">
-            <summary>
-                取得使用者經手過的檢查
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrDcmDestNode})">
-            <summary>
-            建構
-            </summary>
-            <param name="routingDestinationNode"></param>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.DcmDestinationNodeService">
-            <summary>
-            DicomServiceProvider資料表處理服務
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.GetDcmDestinationNode">
-            <summary>
-            取得Dicom routing node
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.GetDcmDestinationNodeAETitle">
-            <summary>
-            取得Dicom routing node
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.AddDicomNodeConfig(ISoftViewerLibrary.Models.DTOs.SvrDcmDestNode)">
-            <summary>
-            增加Routing Node
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDestinationNodesController.Post(System.String)">
-            <summary>
-            刪除Routing Node
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTags},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilterDetail},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilters})">
-            <summary>
-            建構
-            </summary>
-            <param name="tag"></param>
-            <param name="tagFilterDetail"></param>
-            <param name="tagFileters"></param>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PacsDicomTagService">
-            <summary>
-            DicomTags資料表處理服務
-            </summary>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PacsDicomTagFilterDetaulService">
-            <summary>
-            DicomTagFilterDetail資料表處理服務
-            </summary>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PacsDicomTagFiltersService">
-            <summary>
-            DicomTagFilters資料表處理服務
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.GetDicomTag">
-            <summary>
-            取得Dicom Tag列表
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.AddDicomTag(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTags)">
-            <summary>
-            增加Dicom Tag     
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PostDicomTag(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTags,System.String)">
-            <summary>
-            更新Dicom Tag
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.DeleteDicomTag(System.String)">
-            <summary>
-            刪除Dicom Tag
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.GetDicomTagFilterDetail">
-            <summary>
-            取得Dicom Tag Filter Detail 列表
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.AddDicomTagFilterDetail(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilterDetail)">
-            <summary>
-            增加Dicom Tag Filter Detail
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PostDicomTagFilterDetail(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilterDetail,System.String)">
-            <summary>
-            更新Dicom Tag Filter Detail
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.DeleteDicomTagFilterDetail(System.String)">
-            <summary>
-            刪除Dicom Tag
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.GetDicomTagFilters">
-            <summary>
-            取得Dicom Tag Filters 列表
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.AddDicomTagFilters(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilters)">
-            <summary>
-            增加Dicom Tag Filter Filters
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.PostDicomTagFilters(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrDcmTagFilters,System.String)">
-            <summary>
-            更新Dicom Tag Filter Detail
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsDicomTagController.DeleteDicomTagFilters(System.String)">
-            <summary>
-            刪除Dicom Tag
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration},ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.Log.V1.JobOptResultLog})">
-            <summary>
-            建構
-            </summary>
-            <param name="pacsConfig"></param>
-            <param name="logger"></param>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsLogController.PacsConfigDbService">
-            <summary>
-            SystemConfiguration資料表處理服務
-            </summary>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsLogController.JobOptResultDbService">
-            <summary>
-            JobOptResultLog資料表處理服務
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetLogType">
-            <summary>
-            取得Log的型態
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsLogController.AllowedLogTypes">
-            <summary>
-            允許的 Log 類型白名單 (H004 修復)
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetPacsLog(System.String,System.String,System.String)">
-            <summary>
-            取得PACS Log內容
-            </summary>
-            <param name="logType"></param>
-            <param name="aeTitle"></param>
-            <param name="studyDate"></param>
-            <returns></returns>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsLogController.GetGetRoutingErrorLog(System.String,System.String)">
-            <summary>
-            取得Service Job的Log資訊
-            </summary>
-            <param name="patientID"></param>
-            <param name="date"></param>
-            <returns></returns>
         </member>
         <member name="T:ISoftViewerQCSystem.Controllers.PacsServiceNodeController">
             <summary>
@@ -1037,33 +860,6 @@
         <member name="M:ISoftViewerQCSystem.Controllers.PacsServiceProviderController.Post(System.String)">
             <summary>
             刪除DicomServiceProvider
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrFileStorageDevice})">
-            <summary>
-            建構
-            </summary>
-            <param name="device"></param>
-        </member>
-        <member name="F:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.PacsDeviceService">
-            <summary>
-            StorageDevice資料表處理服務
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.GetStorageDevice">
-            <summary>
-            取得儲存裝置資料
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.GetStorageLevel">
-            <summary>
-            取得PACS SystemConfiguration Log Level
-            </summary>
-        </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.PacsStorageDeviceController.PostDicomProviderConfig(ISoftViewerLibrary.Models.DTOs.PacsServer.SvrFileStorageDevice,System.String)">
-            <summary>
-            更新StorageDevice
             </summary>
         </member>
         <member name="M:ISoftViewerQCSystem.Controllers.PacsSysConfigController.#ctor(ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.SvrConfiguration},ISoftViewerQCSystem.Applications.GeneralApplicationService.PacsSysConfigApplicationService,ISoftViewerLibrary.Services.RepositoryService.Interface.ICommonRepositoryService{ISoftViewerLibrary.Models.DTOs.PacsServer.SvrConfigurationsV2},Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.SearchDcmServiceController})">
@@ -1652,6 +1448,23 @@
             判斷 key 名稱是否為敏感欄位
             </summary>
         </member>
+        <member name="T:ISoftViewerQCSystem.Services.DatabaseSchemaProvider">
+            <summary>
+            資料庫 Schema 提供者 - 定義系統所需的資料表結構
+            在這裡定義需要自動檢查和建立的資料表和欄位
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DatabaseSchemaProvider.GetTableDefinitions">
+            <summary>
+            取得需要同步的資料表定義
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.DatabaseSchemaProvider.GetCustomMigrations">
+            <summary>
+            取得自訂遷移腳本
+            用於執行特定版本的資料庫變更
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Services.DecryptedConfigurationProvider">
             <summary>
             解密配置提供者 - 自動解密 DPAPI 加密的配置值
@@ -1718,6 +1531,11 @@
         <member name="M:ISoftViewerQCSystem.Services.DicomTagService.ModifyTags(System.String,System.String,System.String,System.Collections.Generic.List{ISoftViewerLibrary.Models.DTOs.ModifyDicomTagData},ISoftViewerLibrary.Models.DTOs.DicomOperationNodes,System.Boolean)">
             <summary>
                 批量修改多個 Tags
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Services.SchemaMigrationHostedService">
+            <summary>
+            Schema 遷移 Hosted Service - 在應用程式啟動時自動執行資料庫 Schema 檢查和遷移
             </summary>
         </member>
         <member name="T:ISoftViewerQCSystem.Services.SecureConfigurationService">

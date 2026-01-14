@@ -113,10 +113,12 @@ namespace ISoftViewerQCSystem.Controllers
 
             var order = new List<PairDatas>
             {
-                new() { Name = "cast(ImageNumber as int)", Value = "", OrderType = OrderOperator.foASC }
+                new() { Name = "ImageNumber", Value = "" }
             };
 
-            var dicomImageDto = _mapper.Map<IEnumerable<DicomImageDataDto>>(_dicomImageService.Get(where, order));
+            var dicomImageDto = _mapper
+                .Map<IEnumerable<DicomImageDataDto>>(_dicomImageService.Get(where, order))
+                .OrderBy(x => Convert.ToInt32(x.ImageNumber));
             return Ok(dicomImageDto);
         }
 
