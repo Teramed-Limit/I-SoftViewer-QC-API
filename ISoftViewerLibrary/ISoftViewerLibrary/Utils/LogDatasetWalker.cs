@@ -92,6 +92,8 @@ namespace ISoftViewerLibrary.Utils
             // SequenceEnd = false;
             var tag = $"{Indent}{sequence.Tag.ToString().ToUpper()}";
             Log.Debug($"{tag} {sequence.Tag.DictionaryEntry.Name}");
+            _collectItem?.Invoke(Level, sequence.Tag, sequence.Tag.DictionaryEntry.Name,
+                DicomVR.SQ.Code, string.Empty, string.Empty);
             Level++;
             return true;
         }

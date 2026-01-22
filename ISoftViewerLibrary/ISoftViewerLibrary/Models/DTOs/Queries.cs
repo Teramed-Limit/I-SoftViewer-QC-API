@@ -148,37 +148,37 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// <summary>
                 ///     Patient層欄位
                 /// </summary>
-                public string PatientId { get; set; }
+                public string? PatientId { get; set; }
 
                 /// <summary>
                 ///     病人姓名
                 /// </summary>
-                public string PatientsName { get; set; }
+                public string? PatientsName { get; set; }
 
                 /// <summary>
                 ///     性別
                 /// </summary>
-                public string PatientsSex { get; set; }
+                public string? PatientsSex { get; set; }
 
                 /// <summary>
                 ///     出生日期
                 /// </summary>
-                public string PatientsBirthDate { get; set; }
+                public string? PatientsBirthDate { get; set; }
 
                 /// <summary>
                 ///     出生時間
                 /// </summary>
-                public string PatientsBirthTime { get; set; }
+                public string? PatientsBirthTime { get; set; }
 
                 /// <summary>
                 ///     其它病人姓名
                 /// </summary>
-                public string OtherPatientNames { get; set; }
+                public string? OtherPatientNames { get; set; }
 
                 /// <summary>
                 ///     其它病歷號碼
                 /// </summary>
-                public string OtherPatientId { get; set; }
+                public string? OtherPatientId { get; set; }
 
                 #endregion
 
@@ -187,57 +187,57 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// <summary>
                 ///     檢查唯一碼
                 /// </summary>
-                public string StudyInstanceUID { get; set; }
+                public string? StudyInstanceUID { get; set; }
 
                 /// <summary>
                 ///     檢查日期
                 /// </summary>
-                public string StudyDate { get; set; }
+                public string? StudyDate { get; set; }
 
                 /// <summary>
                 ///     檢查時間
                 /// </summary>
-                public string StudyTime { get; set; }
+                public string? StudyTime { get; set; }
 
                 /// <summary>
                 ///     主治醫師
                 /// </summary>
-                public string ReferringPhysiciansName { get; set; }
+                public string? ReferringPhysiciansName { get; set; }
 
                 /// <summary>
                 ///     檢查編號
                 /// </summary>
-                public string StudyID { get; set; }
+                public string? StudyID { get; set; }
 
                 /// <summary>
                 ///     檢查單號
                 /// </summary>
-                public string AccessionNumber { get; set; }
+                public string? AccessionNumber { get; set; }
 
                 /// <summary>
                 ///     檢查說明
                 /// </summary>
-                public string StudyDescription { get; set; }
+                public string? StudyDescription { get; set; }
 
                 /// <summary>
                 ///     儀器種類
                 /// </summary>
-                public string Modality { get; set; }
+                public string? Modality { get; set; }
 
                 /// <summary>
                 ///     執行醫師姓名
                 /// </summary>
-                public string PerformingPhysiciansName { get; set; }
+                public string? PerformingPhysiciansName { get; set; }
 
                 /// <summary>
                 ///     報告醫師姓名
                 /// </summary>
-                public string NameofPhysiciansReading { get; set; }
+                public string? NameofPhysiciansReading { get; set; }
 
                 /// <summary>
                 ///     檢查程序代碼
                 /// </summary>
-                public string ProcedureID { get; set; }
+                public string? ProcedureID { get; set; }
 
                 #endregion
 
@@ -268,37 +268,37 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// <summary>
                 ///     Patient層欄位
                 /// </summary>
-                public string PatientId { get; set; }
+                public string? PatientId { get; set; }
 
                 /// <summary>
                 ///     病人姓名
                 /// </summary>
-                public string PatientsName { get; set; }
+                public string? PatientsName { get; set; }
 
                 /// <summary>
                 ///     性別
                 /// </summary>
-                public string PatientsSex { get; set; }
+                public string? PatientsSex { get; set; }
 
                 /// <summary>
                 ///     出生日期
                 /// </summary>
-                public string PatientsBirthDate { get; set; }
+                public string? PatientsBirthDate { get; set; }
 
                 /// <summary>
                 ///     出生時間
                 /// </summary>
-                public string PatientsBirthTime { get; set; }
+                public string? PatientsBirthTime { get; set; }
 
                 /// <summary>
                 ///     其它病人姓名
                 /// </summary>
-                public string OtherPatientNames { get; set; }
+                public string? OtherPatientNames { get; set; }
 
                 /// <summary>
                 ///     其它病歷號碼
                 /// </summary>
-                public string OtherPatientId { get; set; }
+                public string? OtherPatientId { get; set; }
 
                 #endregion
 
@@ -307,57 +307,57 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// <summary>
                 ///     檢查唯一碼
                 /// </summary>
-                public string StudyInstanceUID { get; set; }
+                public string? StudyInstanceUID { get; set; }
 
                 /// <summary>
                 ///     檢查日期
                 /// </summary>
-                public string StudyDate { get; set; }
+                public string? StudyDate { get; set; }
 
                 /// <summary>
                 ///     檢查時間
                 /// </summary>
-                public string StudyTime { get; set; }
+                public string? StudyTime { get; set; }
 
                 /// <summary>
                 ///     主治醫師
                 /// </summary>
-                public string ReferringPhysiciansName { get; set; }
+                public string? ReferringPhysiciansName { get; set; }
 
                 /// <summary>
                 ///     檢查編號
                 /// </summary>
-                public string StudyID { get; set; }
+                public string? StudyID { get; set; }
 
                 /// <summary>
                 ///     檢查單號
                 /// </summary>
-                public string AccessionNumber { get; set; }
+                public string? AccessionNumber { get; set; }
 
                 /// <summary>
                 ///     檢查說明
                 /// </summary>
-                public string StudyDescription { get; set; }
+                public string? StudyDescription { get; set; }
 
                 /// <summary>
                 ///     儀器種類
                 /// </summary>
-                public string Modality { get; set; }
+                public string? Modality { get; set; }
 
                 /// <summary>
                 ///     執行醫師姓名
                 /// </summary>
-                public string PerformingPhysiciansName { get; set; }
+                public string? PerformingPhysiciansName { get; set; }
 
                 /// <summary>
                 ///     報告醫師姓名
                 /// </summary>
-                public string NameofPhysiciansReading { get; set; }
+                public string? NameofPhysiciansReading { get; set; }
 
                 /// <summary>
                 ///     檢查程序代碼
                 /// </summary>
-                public string ProcedureID { get; set; }
+                public string? ProcedureID { get; set; }
 
                 #endregion
 
@@ -366,42 +366,42 @@ namespace ISoftViewerLibrary.Models.DTOs
                 /// <summary>
                 ///     系列唯一碼
                 /// </summary>
-                public string SeriesInstanceUID { get; set; }
+                public string? SeriesInstanceUID { get; set; }
 
                 /// <summary>
                 ///     儀器種類
                 /// </summary>
-                public string SeriesModality { get; set; }
+                public string? SeriesModality { get; set; }
 
                 /// <summary>
                 ///     系列日期
                 /// </summary>
-                public string SeriesDate { get; set; }
+                public string? SeriesDate { get; set; }
 
                 /// <summary>
                 ///     系列時間
                 /// </summary>
-                public string SeriesTime { get; set; }
+                public string? SeriesTime { get; set; }
 
                 /// <summary>
                 ///     系列編號
                 /// </summary>
-                public string SeriesNumber { get; set; }
+                public string? SeriesNumber { get; set; }
 
                 /// <summary>
                 ///     系列說明
                 /// </summary>
-                public string SeriesDescription { get; set; }
+                public string? SeriesDescription { get; set; }
 
                 /// <summary>
                 ///     病人拍攝位置
                 /// </summary>
-                public string PatientPosition { get; set; }
+                public string? PatientPosition { get; set; }
 
                 /// <summary>
                 ///     拍攝部位
                 /// </summary>
-                public string BodyPartExamined { get; set; }
+                public string? BodyPartExamined { get; set; }
 
                 #endregion
 
