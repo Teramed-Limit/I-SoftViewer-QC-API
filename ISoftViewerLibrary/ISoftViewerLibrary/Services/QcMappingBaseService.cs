@@ -238,21 +238,27 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
     private DataCorrection.V1.DcmTagData CreateDcmTagData(string tagStr, string value,
         DicomOperatorHelper dcmHelper)
     {
-        // Create the root DcmTagData object
-        var rootTag = CreateTag(tagStr.Split('|')[0], value, dcmHelper);
-
-        // Split the tag string into individual tags
         var dicomTagList = tagStr.Split('|');
 
-        // Loop through each tag string and create corresponding DcmTagData objects
-        for (int i = 1; i < dicomTagList.Length; i++)
+        // 從最後一個 tag 開始往回建構嵌套結構（最後一個 tag 才有實際的值）
+        DataCorrection.V1.DcmTagData currentTag = null;
+
+        for (int i = dicomTagList.Length - 1; i >= 0; i--)
         {
-            var currentTag = CreateTag(dicomTagList[i], value, dcmHelper);
-            rootTag.SeqDcmTagData ??= new List<DataCorrection.V1.DcmTagData>();
-            rootTag.SeqDcmTagData.Add(currentTag);
+            // 只有最後一個 tag 才帶有實際的值，其他都是 sequence container
+            var tagValue = (i == dicomTagList.Length - 1) ? value : string.Empty;
+            var newTag = CreateTag(dicomTagList[i], tagValue, dcmHelper);
+
+            // 如果有子 tag，將其加入 SeqDcmTagData
+            if (currentTag != null)
+            {
+                newTag.SeqDcmTagData = new List<DataCorrection.V1.DcmTagData> { currentTag };
+            }
+
+            currentTag = newTag;
         }
 
-        return rootTag;
+        return currentTag;
     }
 
     // Helper method to create a DcmTagData object from a tag string
