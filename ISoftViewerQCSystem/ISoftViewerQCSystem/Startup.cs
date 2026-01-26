@@ -191,6 +191,8 @@ namespace ISoftViewerQCSystem
             services.AddControllers(options =>
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new CamelcaseParameterTransformer()));
+                // .NET 8 升級：關閉 non-nullable reference types 自動視為 Required 的行為
+                options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
             });
 
             services.AddSwaggerGen(c =>

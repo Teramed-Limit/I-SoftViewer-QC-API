@@ -70,7 +70,7 @@ namespace ISoftViewerLibrary.Services
                 if (NewPatientID == string.Empty)
                     NewPatientID = TobeDcmStudyUidTable.PatientID.Value.Trim();
                 if (NewStudyInstanceUID == string.Empty)
-                    NewStudyInstanceUID = TobeDcmStudyUidTable.StudyInstanceUID.Value.Trim();
+                    NewStudyInstanceUID = new string(TobeDcmStudyUidTable.StudyInstanceUID.Value.Where(c => char.IsDigit(c) || c == '.').ToArray());
 
                 bool needToUpdateDb =
                     (OriginalPatientID != NewPatientID || OriginalStudyInstanceUID != NewStudyInstanceUID);
@@ -102,12 +102,12 @@ namespace ISoftViewerLibrary.Services
                         if ((haveProcessed &= MappingDatasetToDcmFile(Data.Dataset, dcmFile, dcmHelper)) == false)
                             break;
 
-                        // 更新Instance UID
+                        // 更新Instance UID，只保留數字和點號
                         dcmFile.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, NewStudyInstanceUID);
                         dcmFile.Dataset.AddOrUpdate(DicomTag.SeriesInstanceUID,
-                            _seTable.UpdateSeriesInstanceUID.Value.Trim());
+                            new string(_seTable.UpdateSeriesInstanceUID.Value.Where(c => char.IsDigit(c) || c == '.').ToArray()));
                         dcmFile.Dataset.AddOrUpdate(DicomTag.SOPInstanceUID,
-                            _imgTable.UpdateSOPInstanceUID.Value.Trim());
+                            new string(_imgTable.UpdateSOPInstanceUID.Value.Where(c => char.IsDigit(c) || c == '.').ToArray()));
 
                         modifiedDcmFile.Add(dcmFilePath, dcmFile);
                         _imgTable.UpdateKeyValueSwap();

@@ -558,7 +558,7 @@ namespace ISoftViewerLibrary.Logic.Converter
                 DicomOperatorHelper dcmHelper = new();
                 DataCorrection.V1.DcmTagData tagData = null;
                 if (dcmHelper.GetDicomValueToStringFromDicomItem(dcmItem, dVR, ref value, IsUtf8Encoding))
-                    tagData = MakeDcmTagData(dTag, value);
+                    tagData = MakeDcmTagData(dTag, value, dVR);
 
                 // 如果有子資料集，遞迴處理
                 if (dcmItem.ValueRepresentation == DicomVR.SQ)
@@ -588,9 +588,17 @@ namespace ISoftViewerLibrary.Logic.Converter
         /// </summary>
         /// <param name="dcmTag"></param>
         /// <param name="value"></param>
+        /// <param name="vr">DICOM VR，用於判斷是否需要清理空白字元</param>
         /// <returns></returns>
-        protected DataCorrection.V1.DcmTagData MakeDcmTagData(DicomTag dcmTag, string value)
+        protected DataCorrection.V1.DcmTagData MakeDcmTagData(DicomTag dcmTag, string value, DicomVR vr = null)
         {
+            // 如果是 UID 類型 (VR = UI)，只保留數字和點號
+            // DICOM UID 只允許數字 0-9 和點號，移除所有其他字元
+            if (vr == DicomVR.UI && !string.IsNullOrEmpty(value))
+            {
+                value = new string(value.Where(c => char.IsDigit(c) || c == '.').ToArray());
+            }
+
             DataCorrection.V1.DcmTagData dcmTagData = new()
             {
                 Group = dcmTag.Group,
@@ -616,7 +624,7 @@ namespace ISoftViewerLibrary.Logic.Converter
 
             DicomOperatorHelper dcmHelper = new();
             if (dcmHelper.GetDicomValueToStringFromDicomItem(dcmItem, dVR, ref value, IsUtf8Encoding) == true)
-                itemValues.Add(MakeDcmTagData(dTag, value));
+                itemValues.Add(MakeDcmTagData(dTag, value, dVR));
         }
 
         /// <summary>

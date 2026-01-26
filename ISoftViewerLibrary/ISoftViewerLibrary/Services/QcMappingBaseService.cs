@@ -93,7 +93,8 @@ public abstract class QcMappingBaseService<T> : QcStudyCmdWithDcmNetService<T> w
             if (data.Group == DicomTag.PatientID.Group && data.Elem == DicomTag.PatientID.Element)
                 NewPatientID = data.Value.Trim();
             if (data.Group == DicomTag.StudyInstanceUID.Group && data.Elem == DicomTag.StudyInstanceUID.Element)
-                NewStudyInstanceUID = data.Value.Trim();
+                // DICOM UID 只允許數字 0-9 和點號，移除所有其他字元
+                NewStudyInstanceUID = new string(data.Value.Where(c => char.IsDigit(c) || c == '.').ToArray());
         });
 
         OriginalPatientID = Data.PatientId;
