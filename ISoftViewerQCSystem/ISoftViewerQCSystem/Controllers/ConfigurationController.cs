@@ -22,7 +22,6 @@ namespace ISoftViewerQCSystem.Controllers
     ///     組態設定控制器
     /// </summary>
     [Route("api/[controller]")]
-    [RequireFunction("SETTINGS")]
     [ApiController]
     [Authorize]
     public class ConfigurationController : ControllerBase
@@ -73,6 +72,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     增加DicomOperationNode
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpPost("dicomOperationNode")]
         public ActionResult AddDicomNodeConfig([FromBody] DicomOperationNodes data)
         {
@@ -84,6 +84,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     更新DicomOperationNode
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpPut("dicomOperationNode/{name}")]
         public ActionResult PostDicomNodeConfig([FromBody] DicomOperationNodes data, string name)
         {
@@ -95,6 +96,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     刪除DicomOperationNode
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpDelete("dicomOperationNode/{name}")]
         public ActionResult Delete(string name)
         {
@@ -121,6 +123,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     增加DicomDestinationNodes
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpPost("dicomDestinationNode")]
         public ActionResult AddDicomDesNodeConfig([FromBody] DicomDestinationNode data)
         {
@@ -132,6 +135,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     更新DicomDestinationNodes
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpPut("dicomDestinationNode/{name}")]
         public ActionResult PostDicomDesNodeConfig([FromBody] DicomDestinationNode data, string name)
         {
@@ -143,6 +147,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     刪除DicomDestinationNodes
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpDelete("dicomDestinationNode/{name}")]
         public ActionResult DeleteDicomDesNodeConfig(string name)
         {
@@ -178,6 +183,7 @@ namespace ISoftViewerQCSystem.Controllers
         /// <summary>
         ///     Restart PACS Service
         /// </summary>
+        [RequireFunction("SETTINGS")]
         [HttpPost("restart/service")]
         public IActionResult RestartService()
         {
