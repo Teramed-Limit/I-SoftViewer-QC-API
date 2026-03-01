@@ -297,46 +297,9 @@ namespace ISoftViewerQCSystem
                 app.UseHsts();
             }
 
-            // Security Headers - 防止 XSS、Clickjacking、MIME-sniffing 等攻擊 (H003)
-            app.Use(async (context, next) =>
-            {
-                // 防止 MIME 類型嗅探
-                context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-
-                // 防止點擊劫持
-                context.Response.Headers.Append("X-Frame-Options", "DENY");
-
-                // XSS 保護（雖然現代瀏覽器已棄用，但仍建議設置）
-                context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-
-                // 控制 Referrer 資訊洩露
-                context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-
-                // Content Security Policy - 通用安全策略（適用於現代 Web 應用）
-                context.Response.Headers.Append("Content-Security-Policy",
-                    "default-src 'self' https:; " +                    // 預設允許 HTTPS 資源
-                    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +  // 腳本（React 需要）
-                    "style-src 'self' 'unsafe-inline' https:; " +     // 樣式（含外部 CSS）
-                    "img-src 'self' data: blob: https:; " +           // 圖片
-                    "font-src 'self' data: https:; " +                // 字型
-                    "connect-src 'self' https: wss:; " +              // API 和 WebSocket
-                    "worker-src 'self' blob:; " +                     // Web Workers
-                    "media-src 'self' https:; " +                     // 影音資源
-                    "object-src 'none'; " +                           // 禁止 Flash/插件
-                    "frame-ancestors 'none'; " +                      // 防止被嵌入 iframe
-                    "base-uri 'self'; " +                             // 限制 base URL
-                    "form-action 'self'");                            // 限制表單提交目標
-
-                // 權限策略 - 限制瀏覽器功能
-                context.Response.Headers.Append("Permissions-Policy",
-                    "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()");
-
-                // 移除伺服器資訊標頭（減少資訊洩露）
-                context.Response.Headers.Remove("Server");
-                context.Response.Headers.Remove("X-Powered-By");
-
-                await next();
-            });
+            // Security Headers - 防止 XSS、Clickjacking、MIME-sniffing 等攻擊 (H003 / S7039)
+            // 根據路由分流 CSP：API 路由使用嚴格策略，SPA 路由允許 MUI Emotion 所需的 unsafe-inline
+            app.UseSecurityHeaders();
 
             // HTTPS 重導向移到較早位置 (M006)
             app.UseHttpsRedirection();

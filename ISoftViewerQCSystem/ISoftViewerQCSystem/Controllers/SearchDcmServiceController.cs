@@ -90,7 +90,7 @@ namespace ISoftViewerQCSystem.Controllers
             }
             catch (Exception e)
             {
-                Logger.LogError("Error handling the request", e);
+                Logger.LogError(e, "Error handling the request");
                 return BadRequest(e.Message);
             }
         }

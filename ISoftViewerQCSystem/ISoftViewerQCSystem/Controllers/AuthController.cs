@@ -53,7 +53,7 @@ public class AuthController : ControllerBase
             request.Username,
             request.Password,
             clientInfo,
-            request.RememberMe);
+            request.RememberMe ?? false);
 
         if (!result.Success)
         {
@@ -178,7 +178,7 @@ public class AuthLoginRequest
     /// <summary>
     /// 是否記住我（延長 Refresh Token 有效期）
     /// </summary>
-    public bool RememberMe { get; set; }
+    public bool? RememberMe { get; set; }
 }
 
 /// <summary>
@@ -207,7 +207,7 @@ public class AuthLogoutRequest
     /// <summary>
     /// 是否從所有裝置登出
     /// </summary>
-    public bool LogoutFromAllDevices { get; set; }
+    public bool? LogoutFromAllDevices { get; set; }
 }
 
 #endregion

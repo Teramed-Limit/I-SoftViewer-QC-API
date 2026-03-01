@@ -1350,6 +1350,37 @@
             中介軟體擴充方法
             </summary>
         </member>
+        <member name="T:ISoftViewerQCSystem.Middleware.SecurityHeadersMiddleware">
+            <summary>
+            安全標頭中介軟體 (H003 / S7039 修復)
+            根據路由類型套用不同的 Content-Security-Policy：
+            - API 路由 (/api/*, /swagger/*): 嚴格 CSP（default-src 'none'）
+            - SPA 路由（其他所有路徑）: 適用於 MUI/Emotion CSS-in-JS 的 CSP
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Middleware.SecurityHeadersMiddleware.ApiPrefixes">
+            <summary>
+            API 路由前綴 — 這些路由回傳 JSON，不需要 inline styles
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Middleware.SecurityHeadersMiddleware.IsApiRoute(Microsoft.AspNetCore.Http.PathString)">
+            <summary>
+            判斷是否為 API 路由
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Middleware.SecurityHeadersMiddleware.BuildSpaContentSecurityPolicy">
+            <summary>
+            建構 SPA 路由的 Content-Security-Policy。
+            MUI v5 + Emotion CSS-in-JS 在執行期動態注入 &lt;style&gt; 標籤，
+            必須允許 style-src 'unsafe-inline'。Nonce 方案無法涵蓋所有第三方元件
+            （ag-grid、CornerstoneJS），因此此處保留 'unsafe-inline'。
+            </summary>
+        </member>
+        <member name="T:ISoftViewerQCSystem.Middleware.SecurityHeadersMiddlewareExtensions">
+            <summary>
+            SecurityHeadersMiddleware 擴充方法
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Models.BatchModifyDicomTagData">
             <summary>
                 批量修改 DICOM Tag 的資料模型

@@ -12,7 +12,7 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["ISoftViewerQCSystem/ISoftViewerQCSystem.csproj", "ISoftViewerQCSystem/"]
 RUN dotnet restore "ISoftViewerQCSystem/ISoftViewerQCSystem.csproj"
-COPY . .
+COPY ["ISoftViewerQCSystem/", "ISoftViewerQCSystem/"]
 WORKDIR "/src/TeramedQCSystem"
 RUN dotnet build "ISoftViewerQCSystem.csproj" -c Release -o /app/build
 
@@ -22,4 +22,5 @@ RUN dotnet publish "ISoftViewerQCSystem.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER $APP_UID
 ENTRYPOINT ["dotnet", "TeramedQCSystem.dll"]
