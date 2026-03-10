@@ -80,7 +80,10 @@ namespace ISoftViewerQCSystem.Controllers
         [HttpGet("patientId/{patientId}")]
         public ActionResult<DicomPatientData> GetPatient(string patientId)
         {
-            return Ok(_dicomPatientService.Get(patientId).First());
+            var patient = _dicomPatientService.Get(patientId).FirstOrDefault();
+            if (patient == null)
+                return NotFound($"Patient not found: {patientId}");
+            return Ok(patient);
         }
 
         /// <summary>
@@ -89,7 +92,10 @@ namespace ISoftViewerQCSystem.Controllers
         [HttpGet("studyInstanceUID/{studyInstanceUID}")]
         public ActionResult<DicomStudyData> GetStudy(string studyInstanceUID)
         {
-            return Ok(_dicomStudyService.Get(studyInstanceUID).First());
+            var study = _dicomStudyService.Get(studyInstanceUID).FirstOrDefault();
+            if (study == null)
+                return NotFound($"Study not found: {studyInstanceUID}");
+            return Ok(study);
         }
 
         /// <summary>
