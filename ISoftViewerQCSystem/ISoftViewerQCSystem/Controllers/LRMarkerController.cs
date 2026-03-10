@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ISoftViewerQCSystem.Services;
 using Log = Serilog.Log;
 using System;
+using TeraLinkaAuth.Extensions;
 
 namespace ISoftViewerQCSystem.Controllers
 {
@@ -34,6 +35,7 @@ namespace ISoftViewerQCSystem.Controllers
 
             try
             {
+                request.UserId = User.GetUserId();
                 var result = _service.CorrectMarker(request);
                 return ToActionResult(result);
             }

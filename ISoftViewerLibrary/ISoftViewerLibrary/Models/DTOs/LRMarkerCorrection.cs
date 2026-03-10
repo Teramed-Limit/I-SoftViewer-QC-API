@@ -36,6 +36,10 @@ namespace ISoftViewerLibrary.Models.DTOs
         public bool GenerateNewSopInstanceUid { get; set; }
         public bool SendToPacs { get; set; }
         public string? CStoreNodeName { get; set; }
+        /// <summary>
+        /// 操作者 ID（由 Controller 從 JWT 取得，寫入 DICOM OperatorsName tag）
+        /// </summary>
+        public string? UserId { get; set; }
     }
 
     public class CoverRegion

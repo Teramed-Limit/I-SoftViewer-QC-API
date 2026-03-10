@@ -211,6 +211,7 @@ namespace ISoftViewerLibrary.Services
             DicomPixelInfo pixelInfo)
         {
             var dataset = dcmFile.Dataset;
+            var now = DateTime.Now;
 #pragma warning disable CS0618
             dataset.AddOrUpdate(DicomTag.DerivationDescription,
                 "Pixel data modified: L/R marker corrected");
@@ -223,7 +224,7 @@ namespace ISoftViewerLibrary.Services
             };
             dataset.AddOrUpdate(new DicomSequence(DicomTag.DerivationCodeSequence, derivationCodeItem));
 
-            string comment = $"L/R marker corrected on {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+            string comment = $"L/R marker corrected on {now:yyyy-MM-dd HH:mm:ss}";
             dataset.AddOrUpdate(DicomTag.ImageComments, comment);
 
             string imageType = dataset.Contains(DicomTag.ImageType)
@@ -232,6 +233,47 @@ namespace ISoftViewerLibrary.Services
             {
                 imageType = "DERIVED\\" + imageType;
                 dataset.AddOrUpdate(DicomTag.ImageType, imageType);
+            }
+
+            // Source Image Sequence：記錄原始影像的參考，供追溯來源
+            string originalSopUid = dataset.Contains(DicomTag.SOPInstanceUID)
+                ? dataset.Get<string>(DicomTag.SOPInstanceUID) : "";
+            if (!string.IsNullOrEmpty(originalSopUid))
+            {
+                var sourceImageItem = new DicomDataset
+                {
+                    { DicomTag.ReferencedSOPClassUID,
+                      dataset.Contains(DicomTag.SOPClassUID) ? dataset.Get<string>(DicomTag.SOPClassUID) : "" },
+                    { DicomTag.ReferencedSOPInstanceUID, originalSopUid }
+                };
+                dataset.AddOrUpdate(new DicomSequence(DicomTag.SourceImageSequence, sourceImageItem));
+            }
+
+            // Content Date/Time
+            dataset.AddOrUpdate(DicomTag.ContentDate, now.ToString("yyyyMMdd"));
+            dataset.AddOrUpdate(DicomTag.ContentTime, now.ToString("HHmmss.ffffff"));
+
+            // Instance Creation Date/Time
+            dataset.AddOrUpdate(DicomTag.InstanceCreationDate, now.ToString("yyyyMMdd"));
+            dataset.AddOrUpdate(DicomTag.InstanceCreationTime, now.ToString("HHmmss.ffffff"));
+            
+            // Contributing Equipment Sequence：記錄修改軟體資訊與操作者
+            var contributingEquipItem = new DicomDataset
+            {
+                { DicomTag.ContributionDescription, "L/R marker correction" },
+                { DicomTag.Manufacturer, "TeraLinka" },
+                { DicomTag.ContributionDateTime, now.ToString("yyyyMMddHHmmss.ffffff") }
+            };
+            if (!string.IsNullOrWhiteSpace(request.UserId))
+            {
+                contributingEquipItem.Add(DicomTag.OperatorsName, request.UserId);
+            }
+            dataset.AddOrUpdate(new DicomSequence(DicomTag.ContributingEquipmentSequence, contributingEquipItem));
+
+            // Reviewer Name (300E,0008)：記錄執行此修改的使用者
+            if (!string.IsNullOrWhiteSpace(request.UserId))
+            {
+                dataset.AddOrUpdate(DicomTag.ReviewerName, request.UserId);
             }
 
             // 更新 Window Center/Level：確保前景/背景極值在窗口內可見
