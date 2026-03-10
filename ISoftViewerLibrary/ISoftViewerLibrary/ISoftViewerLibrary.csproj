@@ -22,6 +22,7 @@
 	</ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Efferent.Native" Version="4.1.0" />
     <PackageReference Include="fo-dicom.Drawing" Version="4.0.8" />
     <PackageReference Include="fo-dicom.NetCore" Version="4.0.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />

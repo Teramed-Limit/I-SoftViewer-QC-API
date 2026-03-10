@@ -1564,6 +1564,34 @@
                 批量修改多個 Tags
             </summary>
         </member>
+        <member name="T:ISoftViewerQCSystem.Services.LRMarkerCorrectionService">
+            <summary>
+            LR Marker 修正與還原的業務邏輯服務。
+            負責 DICOM 檔案操作、備份管理、路徑推導、C-Store 發送。
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Services.LRMarkerCorrectionService._issuedImageNumbers">
+            <summary>
+            記錄每個 Series 已發出的最大 ImageNumber，避免 PACS 尚未寫入 DB 時重複取號。
+            Key = SeriesInstanceUID, Value = 已發出的最大 ImageNumber。
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.LRMarkerCorrectionService.CorrectMarker(ISoftViewerLibrary.Models.DTOs.CorrectLRMarkerRequest)">
+            <summary>
+            執行 LR Marker 修正。
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.LRMarkerCorrectionService.RestoreMarker(ISoftViewerLibrary.Models.DTOs.RestoreLRMarkerRequest)">
+            <summary>
+            還原 LR Marker 至原始狀態。
+            </summary>
+        </member>
+        <member name="M:ISoftViewerQCSystem.Services.LRMarkerCorrectionService.GetNextImageNumber(System.String)">
+            <summary>
+            查詢同 Series 下目前最大的 ImageNumber，結合 in-memory 已發出記錄，回傳 max + 1。
+            避免 PACS 尚未寫入 DB 時連續請求取到重複號碼。
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Services.SchemaMigrationHostedService">
             <summary>
             Schema 遷移 Hosted Service - 在應用程式啟動時自動執行資料庫 Schema 檢查和遷移

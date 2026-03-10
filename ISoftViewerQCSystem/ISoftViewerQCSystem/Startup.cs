@@ -145,6 +145,7 @@ namespace ISoftViewerQCSystem
 
             services.AddScoped<PacsDBOperationService>();
             services.AddScoped<DicomTagService>();
+            services.AddScoped<LRMarkerCorrectionService>();
             services.AddScoped<QCOperationContext>();
 
             services.AddScoped<PacsSysConfigApplicationService>();

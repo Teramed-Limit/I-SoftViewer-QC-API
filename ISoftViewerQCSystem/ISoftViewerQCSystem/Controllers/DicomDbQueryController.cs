@@ -60,7 +60,7 @@ namespace ISoftViewerQCSystem.Controllers
             try
             {
                 TrimObjectHelper.Trim(queryParams);
-                return Ok(_dicomPatientStudyService.Query(queryParams));
+                return Ok(_dicomPatientStudyService.Query(queryParams).OrderBy(x => x.PatientId));
             }
             catch (Exception e)
             {
