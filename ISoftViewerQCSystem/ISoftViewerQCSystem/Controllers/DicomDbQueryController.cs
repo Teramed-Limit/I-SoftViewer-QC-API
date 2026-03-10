@@ -10,8 +10,10 @@ using ISoftViewerLibrary.Services.RepositoryService.Table;
 using ISoftViewerLibrary.Services.RepositoryService.View;
 using ISoftViewerLibrary.Utils;
 using ISoftViewerQCSystem.Services;
+using ISoftViewerQCSystem.utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -32,6 +34,7 @@ namespace ISoftViewerQCSystem.Controllers
         private readonly DicomImagePathViewService _dicomImagePathService;
         private readonly DicomPatientStudyViewService _dicomPatientStudyService;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
         public DicomDbQueryController(
             DicomPatientService dicomPatientService,
@@ -40,7 +43,8 @@ namespace ISoftViewerQCSystem.Controllers
             DicomImageService dicomImageService,
             DicomImagePathViewService dicomImagePathService,
             DicomPatientStudyViewService dicomPatientStudyService,
-            IMapper mapper)
+            IMapper mapper,
+            IConfiguration configuration)
         {
             _dicomPatientService = dicomPatientService;
             _dicomStudyService = dicomStudyService;
@@ -49,6 +53,7 @@ namespace ISoftViewerQCSystem.Controllers
             _dicomImagePathService = dicomImagePathService;
             _dicomPatientStudyService = dicomPatientStudyService;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -174,6 +179,65 @@ namespace ISoftViewerQCSystem.Controllers
                 _mapper.Map<IEnumerable<SearchImagePathViewDto>>(
                     _dicomImagePathService.GetSpecifyColumn(where, columns));
             return Ok(dicomImagePathDto);
+        }
+
+        /// <summary>
+        ///     Preview images for a study (first 6 JPEG thumbnails from the first series)
+        /// </summary>
+        [HttpGet("studyInstanceUID/{studyInstanceUID}/previewImages")]
+        public ActionResult GetPreviewImages(string studyInstanceUID)
+        {
+            try
+            {
+                // Get all series for the study
+                var seriesWhere = new List<PairDatas>
+                {
+                    new() { Name = "StudyInstanceUID", Value = studyInstanceUID }
+                };
+                var seriesList = _dicomSeriesService.Get(seriesWhere)?
+                    .OrderBy(s => Convert.ToInt32(string.IsNullOrEmpty(s.SeriesNumber) ? "0" : s.SeriesNumber))
+                    .ToList();
+
+                if (seriesList == null || !seriesList.Any())
+                    return Ok(Array.Empty<object>());
+
+                var firstSeries = seriesList.First();
+
+                // Get images for the first series
+                var imageWhere = new List<PairDatas>
+                {
+                    new() { Name = "SeriesInstanceUID", Value = firstSeries.SeriesInstanceUID }
+                };
+                var imageColumns = new List<PairDatas>
+                {
+                    new() { Name = "HttpFilePath" },
+                    new() { Name = "SeriesInstanceUID" },
+                    new() { Name = "ImageNumber", Type = FieldType.ftInt, OrderType = OrderOperator.foASC },
+                };
+
+                var images = _dicomImagePathService.GetSpecifyColumn(imageWhere, imageColumns)?
+                    .OrderBy(x => x.ImageNumber)
+                    .Take(6)
+                    .ToList();
+
+                if (images == null || !images.Any())
+                    return Ok(Array.Empty<object>());
+
+                var virtualFilePath = _configuration.GetSection("VirtualFilePath").Value ?? "";
+
+                var previewImages = images.Select(img => new
+                {
+                    imageUrl = virtualFilePath + FileUtils.ConvertToWebPath(img.HttpFilePath, ".jpg"),
+                    imageNumber = img.ImageNumber
+                });
+
+                return Ok(previewImages);
+            }
+            catch (Exception e)
+            {
+                Serilog.Log.Error(e, "GetPreviewImages error: {Message}", e.Message);
+                return BadRequest(e.Message);
+            }
         }
     }
 }

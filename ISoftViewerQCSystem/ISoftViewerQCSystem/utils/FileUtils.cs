@@ -7,7 +7,9 @@ namespace ISoftViewerQCSystem.utils
         public static string ConvertToWebPath(string filePath, string ext)
         {
             if (string.IsNullOrEmpty(filePath)) return "";
-            return Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + ext);
+            var directory = Path.GetDirectoryName(filePath) ?? "";
+            return Path.Combine(directory, Path.GetFileNameWithoutExtension(filePath) + ext)
+                .Replace('\\', '/');
         }
     }
 }

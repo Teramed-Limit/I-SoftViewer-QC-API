@@ -647,6 +647,11 @@
                 ImagePath level data by (SeriesInstanceUID)
             </summary>
         </member>
+        <member name="M:ISoftViewerQCSystem.Controllers.DicomDbQueryController.GetPreviewImages(System.String)">
+            <summary>
+                Preview images for a study (first 6 JPEG thumbnails from the first series)
+            </summary>
+        </member>
         <member name="T:ISoftViewerQCSystem.Controllers.DicomTagController">
             <summary>
                 DB Dicom Query
