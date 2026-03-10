@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ISoftViewerLibrary.Applications.Interface;
 using ISoftViewerLibrary.Models.DTOs;
+using ISoftViewerLibrary.Models.ValueObjects;
+using ISoftViewerLibrary.Services.RepositoryService.Table;
+using ISoftViewerLibrary.Services.RepositoryService.View;
 using ISoftViewerQCSystem.Applications;
 using ISoftViewerQCSystem.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -28,10 +32,15 @@ namespace ISoftViewerQCSystem.Controllers
         /// </summary>
         /// <param name="cmdServices"></param>
         /// <param name="logger"></param>
-        public StudyMaintenanceController(IEnumerable<IApplicationCmdService> cmdServices,
-            ILogger<StudyMaintenanceController> logger)
+        public StudyMaintenanceController(
+            IEnumerable<IApplicationCmdService> cmdServices,
+            ILogger<StudyMaintenanceController> logger,
+            DicomImageService dicomImageService,
+            DicomImagePathViewService dicomImagePathService)
         {
             Logger = logger;
+            _dicomImageService = dicomImageService;
+            _dicomImagePathService = dicomImagePathService;
             var applicationCmdServices = cmdServices as IApplicationCmdService[] ?? cmdServices.ToArray();
             DcmStudyMaintenanceService =
                 (DcmDataCmdApplicationService)applicationCmdServices.Single(x =>
@@ -131,12 +140,33 @@ namespace ISoftViewerQCSystem.Controllers
         }
 
         /// <summary>
-        ///     刪除檢查
+        ///     刪除單張影像 (Instance 層級)
         /// </summary>
-        /// <param name="study_id"></param>
-        [HttpDelete("{study_id}")]
-        public void Delete(string study_id)
+        /// <param name="instanceUid">SOP Instance UID</param>
+        /// <returns></returns>
+        [HttpDelete("images/{instanceUid}")]
+        public ActionResult DeleteImage(string instanceUid)
         {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(instanceUid))
+                    return BadRequest("Instance UID is required.");
+                
+                // 刪除資料庫記錄
+                var deleted = _dicomImageService.Delete(instanceUid);
+                if (!deleted)
+                    return NotFound($"Image with instance UID '{instanceUid}' not found.");
+                
+                Logger.LogInformation("Image deleted successfully. InstanceUID: {InstanceUID}, User: {User}",
+                    instanceUid, User.Identity?.Name);
+
+                return Ok(new { message = "Image deleted successfully.", instanceUid });
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Failed to delete image. InstanceUID: {InstanceUID}", instanceUid);
+                return BadRequest(e.Message);
+            }
         }
 
         #region Fields
@@ -150,6 +180,16 @@ namespace ISoftViewerQCSystem.Controllers
         ///     DICOM QC
         /// </summary>
         private readonly IApplicationCmdService StudyQcApplicationService;
+
+        /// <summary>
+        ///     DICOM 影像資料庫服務
+        /// </summary>
+        private readonly DicomImageService _dicomImageService;
+
+        /// <summary>
+        ///     DICOM 影像路徑查詢服務
+        /// </summary>
+        private readonly DicomImagePathViewService _dicomImagePathService;
 
         /// <summary>
         ///     日誌記錄器

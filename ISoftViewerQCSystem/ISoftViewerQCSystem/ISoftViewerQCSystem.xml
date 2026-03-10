@@ -1079,7 +1079,7 @@
                 病歷檢查維護控制器
             </summary>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.#ctor(System.Collections.Generic.IEnumerable{ISoftViewerLibrary.Applications.Interface.IApplicationCmdService},Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.StudyMaintenanceController})">
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.#ctor(System.Collections.Generic.IEnumerable{ISoftViewerLibrary.Applications.Interface.IApplicationCmdService},Microsoft.Extensions.Logging.ILogger{ISoftViewerQCSystem.Controllers.StudyMaintenanceController},ISoftViewerLibrary.Services.RepositoryService.Table.DicomImageService,ISoftViewerLibrary.Services.RepositoryService.View.DicomImagePathViewService)">
             <summary>
                 建構
             </summary>
@@ -1131,11 +1131,12 @@
             </summary>
             <param name="value"></param>
         </member>
-        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Delete(System.String)">
+        <member name="M:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.DeleteImage(System.String)">
             <summary>
-                刪除檢查
+                刪除單張影像 (Instance 層級)
             </summary>
-            <param name="study_id"></param>
+            <param name="instanceUid">SOP Instance UID</param>
+            <returns></returns>
         </member>
         <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.DcmStudyMaintenanceService">
             <summary>
@@ -1145,6 +1146,16 @@
         <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.StudyQcApplicationService">
             <summary>
                 DICOM QC
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController._dicomImageService">
+            <summary>
+                DICOM 影像資料庫服務
+            </summary>
+        </member>
+        <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController._dicomImagePathService">
+            <summary>
+                DICOM 影像路徑查詢服務
             </summary>
         </member>
         <member name="F:ISoftViewerQCSystem.Controllers.StudyMaintenanceController.Logger">
